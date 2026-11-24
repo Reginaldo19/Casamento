@@ -2,860 +2,611 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ateliê de Convites — Editor Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ateliê de Convites — Estúdio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Great+Vibes&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
-:root{
-  --peach:#f7eae2;
-  --terra:#bd8673;
-  --ink:#291e1a;
-  --deep:#8e5b49;
-  --line:#ead0c3;
-  --muted:#8e7064;
-  --editor-bg:#1e1a18;
-  --editor-panel:#2d2825;
-  --editor-border:#3f3733;
-  --editor-text:#e8ddd6;
-  --accent:#c78f7c;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  background:radial-gradient(circle at top,#fff7f1,#f0ddd2 55%,#dfc0b0);
-  color:var(--ink);
-  font-family:Montserrat,sans-serif;
-  min-height:100vh;
-}
-.script{font-family:'Great Vibes',cursive}
-.serif{font-family:'Cormorant Garamond',serif}
-button,input,textarea,select{font:inherit}
-.app{max-width:1440px;margin:auto;padding:22px}
-.top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:14px;
-  margin-bottom:22px;
-}
-.brand{color:#8a4b33}
-.brand .script{font-size:40px;line-height:1}
-.brand small{font-size:9px;letter-spacing:3px;text-transform:uppercase}
-.btn{
-  border:0;
-  background:linear-gradient(145deg,#c78f7c,#a96d59);
-  color:white;
-  border-radius:12px;
-  padding:12px 16px;
-  font-size:12px;
-  font-weight:700;
-  cursor:pointer;
-  box-shadow:0 7px 16px #9b604326;
-  transition:.2s;
-}
-.btn:hover{filter:brightness(.97);transform:translateY(-1px)}
-.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn.small{padding:8px 12px;font-size:11px;border-radius:9px}
-.ghost{
-  border:1px solid var(--line);
-  background:#fff9f5;
-  color:#8a4b33;
-  border-radius:11px;
-  padding:11px 14px;
-  font-size:12px;
-  font-weight:700;
-  cursor:pointer;
-  transition:.2s;
-}
-.ghost:hover{background:#fff;border-color:#c78f7c}
-.ghost.small{padding:7px 10px;font-size:10px;border-radius:8px}
-.field{
-  width:100%;
-  border:1px solid #e6cabb;
-  border-radius:11px;
-  background:#fff;
-  padding:12px;
-  font-size:13px;
-  outline:0;
-  color:#382923;
-  transition:.2s;
-}
-.field:focus{border-color:#bd8673;box-shadow:0 0 0 3px #bd867322}
-label{display:block;font-size:11px;font-weight:600;color:#725448}
-label .field{margin-top:6px}
-.panel{
-  background:#fffaf7d9;
-  border:1px solid #fff;
-  border-radius:20px;
-  padding:20px;
-  box-shadow:0 15px 35px #84533a12;
-}
-.muted{color:var(--muted)}
-.hidden{display:none!important}
-.layout{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(360px,480px);
-  gap:22px;
-  align-items:start;
-}
-.editor-area{min-width:0}
+  :root {
+    --terra: #bd8673;
+    --terra-dark: #8e5b49;
+    --bg-soft: #faf4f0;
+    --ink: #241915;
+  }
 
-/* === CODE EDITOR STYLE === */
-.code-editor{
-  background:var(--editor-bg);
-  border-radius:16px;
-  overflow:hidden;
-  box-shadow:0 12px 40px #1e1a1850;
-  display:flex;
-  flex-direction:column;
-  min-height:560px;
-}
-.code-tabs{
-  display:flex;
-  background:#25201d;
-  border-bottom:1px solid var(--editor-border);
-  overflow-x:auto;
-  flex-shrink:0;
-}
-.code-tab{
-  padding:10px 16px;
-  font-size:11px;
-  font-weight:600;
-  color:#8a7a72;
-  cursor:pointer;
-  border:0;
-  background:transparent;
-  white-space:nowrap;
-  border-bottom:2px solid transparent;
-  transition:.2s;
-  font-family:Montserrat,sans-serif;
-}
-.code-tab:hover{color:#c0b0a8}
-.code-tab.active{
-  color:#e8ddd6;
-  border-bottom-color:var(--accent);
-  background:#2d2825;
-}
-.code-body{
-  display:flex;
-  flex:1;
-  min-height:0;
-}
-.code-gutter{
-  background:#181514;
-  padding:16px 10px;
-  text-align:right;
-  font-family:'Courier New',monospace;
-  font-size:12px;
-  line-height:1.7;
-  color:#4a403a;
-  user-select:none;
-  min-width:44px;
-  border-right:1px solid var(--editor-border);
-}
-.code-gutter span{display:block}
-.code-content{
-  flex:1;
-  position:relative;
-  overflow:auto;
-}
-.code-pane{
-  padding:16px;
-  display:none;
-  font-family:'Courier New',monospace;
-  font-size:12.5px;
-  line-height:1.7;
-  color:var(--editor-text);
-}
-.code-pane.active{display:block}
-.code-pane .line{display:flex;align-items:flex-start;gap:8px}
-.code-pane .ln{color:#4a403a;user-select:none;min-width:20px;text-align:right;flex-shrink:0}
-.code-pane .key{color:#e0b080}
-.code-pane .str{color:#a8d08d}
-.code-pane .punc{color:#8a7a72}
-.code-pane .num{color:#d4a5a5}
-.code-pane input.editor-input{
-  background:#181514;
-  border:1px solid #3f3733;
-  border-radius:6px;
-  color:#e8ddd6;
-  padding:4px 8px;
-  font-family:'Courier New',monospace;
-  font-size:12.5px;
-  width:100%;
-  outline:0;
-  transition:.2s;
-}
-.code-pane input.editor-input:focus{
-  border-color:var(--accent);
-  box-shadow:0 0 0 2px #c78f7c33;
-}
-.code-pane textarea.editor-input{
-  background:#181514;
-  border:1px solid #3f3733;
-  border-radius:6px;
-  color:#e8ddd6;
-  padding:6px 8px;
-  font-family:'Courier New',monospace;
-  font-size:12.5px;
-  width:100%;
-  outline:0;
-  resize:vertical;
-  min-height:48px;
-}
-.code-pane textarea.editor-input:focus{
-  border-color:var(--accent);
-  box-shadow:0 0 0 2px #c78f7c33;
-}
-.code-pane select.editor-input{
-  background:#181514;
-  border:1px solid #3f3733;
-  border-radius:6px;
-  color:#e8ddd6;
-  padding:4px 8px;
-  font-family:'Courier New',monospace;
-  font-size:12.5px;
-  outline:0;
-  width:100%;
-}
-.code-pane select.editor-input:focus{
-  border-color:var(--accent);
-}
-.code-footer{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px 16px;
-  background:#25201d;
-  border-top:1px solid var(--editor-border);
-  font-size:10px;
-  color:#8a7a72;
-}
-.code-footer .status{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.code-footer .dot{
-  width:8px;height:8px;border-radius:50%;
-  background:#5a8a5a;
-}
-.code-footer .dot.dirty{background:#c78f4c}
-.code-footer .dot.error{background:#c74c4c}
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-soft);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
 
-/* === PREVIEW PANEL === */
-.preview-wrap{position:sticky;top:15px}
-.preview-head{
-  text-align:center;
-  font-size:10px;
-  letter-spacing:2px;
-  color:#8a4b33;
-  margin:0 0 10px;
-}
-.paper{
-  background:linear-gradient(160deg,#fcf6f2,#f7eae2 52%,#f2dfd4);
-  box-shadow:0 25px 60px -15px #8a4b3340;
-  border-radius:26px;
-  padding:13px;
-  position:relative;
-  overflow:hidden;
-}
-.frame{
-  background:linear-gradient(180deg,#fffbf9a6,#f8eae2bf);
-  border:1.5px solid #c57b5c59;
-  box-shadow:inset 0 3px 15px #8f563f29,0 2px 6px #fff9;
-  border-radius:20px;
-  padding:45px 20px 34px;
-  text-align:center;
-  position:relative;
-  overflow:hidden;
-}
-.pearl{
-  width:13px;height:13px;border-radius:50%;
-  background:radial-gradient(circle at 32% 30%,white,#fff7f2 28%,#f0d2c2 68%,#c7947e);
-  box-shadow:0 4px 8px #703a2647;
-  position:absolute;
-}
-.flower{
-  position:absolute;
-  color:#d99474;
-  opacity:.65;
-  font-size:68px;
-  pointer-events:none;
-}
-.pv-hosts{font:54px/.98 'Great Vibes';overflow-wrap:anywhere}
-.pv-message{font:17px 'Cormorant Garamond';margin:16px 0}
-.pv-date{font-size:18px;font-weight:700;margin-top:5px}
-.preview-details{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-  margin-top:22px;
-  font-size:10px;
-}
-.preview-details b{
-  display:block;
-  font-size:19px;
-  margin-bottom:4px;
-  color:#a56f5d;
-}
-.guest-row{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  background:#fff;
-  border:1px solid #f0d9ce;
-  border-radius:13px;
-  padding:11px;
-  margin-top:8px;
-  transition:.2s;
-}
-.guest-row:hover{border-color:#dbb8a8}
-.guest-row .info{flex:1;min-width:0}
-.guest-row strong{display:block;font-size:12px;overflow-wrap:anywhere}
-.guest-row small{font-size:10px;color:#987464}
-.status{font-size:10px;color:#8d604e}
-.pill{
-  display:inline-block;
-  background:#f5e4db;
-  border-radius:30px;
-  padding:5px 9px;
-  font-size:10px;
-  color:#8a4b33;
-}
-.pill.accept{background:#d9f0d9;color:#2d6a2d}
-.pill.decline{background:#f0d9d9;color:#8a2d2d}
-.pill.pending{background:#f5e4db;color:#8a4b33}
-.toast{
-  position:fixed;
-  bottom:18px;left:50%;
-  transform:translateX(-50%);
-  background:#2d211c;
-  color:white;
-  padding:12px 18px;
-  border-radius:30px;
-  font-size:12px;
-  z-index:999;
-  box-shadow:0 8px 25px #0002;
-  transition:.3s;
-}
-.login{max-width:440px;margin:7vh auto}
-.guest-page{max-width:520px;margin:20px auto}
-.guest-page .frame{padding-top:48px}
-.guest-name{font:36px 'Cormorant Garamond';color:#8a4b33;margin:18px 0}
-.guest-info{
-  background:#fff9f5;
-  border:1px solid #efd7cb;
-  border-radius:14px;
-  padding:14px;
-  text-align:left;
-  margin-top:15px;
-  font-size:12px;
-  line-height:1.8;
-}
-.guest-info b{color:#8a4b33}
-.rsvp{margin-top:16px;text-align:left}
-.rsvp label{margin:12px 0}
-.radio-line{
-  display:flex;
-  gap:18px;
-  align-items:center;
-  margin:12px 0;
-  font-size:12px;
-}
-.radio-line label{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-weight:500;
-}
-.notice{
-  background:#f9eee8;
-  border:1px solid #edd4c8;
-  border-radius:12px;
-  padding:12px;
-  font-size:11px;
-  line-height:1.6;
-}
-.action-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-  margin:8px 0 4px;
-}
-.action-btn-group{
-  border:0;
-  background:transparent;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:8px;
-  color:#231a17;
-  font-family:'Cormorant Garamond';
-  font-weight:700;
-  font-size:13px;
-  line-height:1.1;
-  cursor:pointer;
-}
-.action-circle{
-  width:58px;height:58px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:linear-gradient(145deg,#C78F7C,#B07764);
-  box-shadow:0 6px 14px #9f6a5852,inset 0 1px 2px #ffffff73;
-  transition:.25s;
-}
-.action-circle svg{
-  width:28px;height:28px;
-  fill:none;
-  stroke:#231a17;
-  stroke-width:1.8;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-.action-btn-group:hover .action-circle{transform:translateY(-4px) scale(1.06)}
-.countdown-box{
-  margin-top:14px;
-  background:#ffffffbf;
-  border:1px solid #fff;
-  border-radius:17px;
-  padding:14px;
-  text-align:center;
-}
-.countdown-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:7px;
-  max-width:310px;
-  margin:auto;
-}
-.countdown-grid div{
-  background:#fdf8f5;
-  border:1px solid #f3d5c5;
-  border-radius:10px;
-  padding:7px;
-}
-.countdown-grid b{display:block;font:700 22px 'Cormorant Garamond'}
-.countdown-grid small{font-size:9px;color:#8a4b33;text-transform:uppercase}
-.guest-modal{
-  position:fixed;
-  inset:0;
-  z-index:50;
-  background:#281a16a8;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:16px;
-}
-.guest-modal.hidden{display:none}
-.guest-modal-box{
-  position:relative;
-  width:min(100%,430px);
-  max-height:85vh;
-  overflow:auto;
-  background:linear-gradient(160deg,#fcf6f2,#f7eae2);
-  border:1px solid #fff;
-  border-radius:22px;
-  padding:25px;
-  box-shadow:0 20px 60px #0003;
-}
-.guest-modal-box h2{
-  font:600 29px 'Cormorant Garamond';
-  color:#8a4b33;
-  margin:0 0 12px;
-}
-.guest-modal-box p{font-size:13px;line-height:1.7}
-.modal-x{
-  position:absolute;
-  right:13px;top:9px;
-  border:0;
-  background:transparent;
-  font-size:27px;
-  color:#8a4b33;
-  cursor:pointer;
-}
-.dashboard-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  margin-bottom:18px;
-}
-.dash-card{
-  background:#fff;
-  border-radius:14px;
-  padding:14px;
-  text-align:center;
-  border:1px solid #f0d9ce;
-}
-.dash-card b{
-  display:block;
-  font:700 28px 'Cormorant Garamond';
-  margin-bottom:4px;
-}
-.dash-card.accept b{color:#2d6a2d}
-.dash-card.decline b{color:#8a2d2d}
-.dash-card.pending b{color:#8a4b33}
-.dash-card small{font-size:10px;color:#8a7a72;text-transform:uppercase;letter-spacing:1px}
-.dash-list{display:flex;flex-direction:column;gap:6px}
-.dash-item{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 12px;
-  border-radius:10px;
-  background:#fff;
-  border:1px solid #f0d9ce;
-}
-.dash-item .info{flex:1;min-width:0}
-.dash-item strong{display:block;font-size:12px;overflow-wrap:anywhere}
-.dash-item small{font-size:10px;color:#987464}
-@media(max-width:960px){
-  .layout{grid-template-columns:1fr}
-  .preview-wrap{position:static;max-width:440px;margin:0 auto;width:100%}
-  .app{padding:15px}
-  .brand .script{font-size:34px}
-  .panel{padding:16px}
-  .dashboard-grid{grid-template-columns:repeat(3,1fr)}
-}
-@media(max-width:480px){
-  .dashboard-grid{grid-template-columns:1fr 1fr 1fr;gap:6px}
-  .dash-card{padding:10px 4px}
-  .dash-card b{font-size:20px}
-  .top{align-items:flex-start}
-  .actions .btn,.actions .ghost{flex:1}
-  .pv-hosts{font-size:48px}
-  .code-gutter{display:none}
-  .code-pane .ln{display:none}
-}
+  .script {
+    font-family: 'Great Vibes', cursive;
+  }
+
+  .serif {
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  /* Estética da folha do convite usada apenas na aba Prévia e na visão do convidado */
+  .paper {
+    background: linear-gradient(160deg, #fcf6f2, #f7eae2 52%, #f2dfd4);
+    box-shadow: 0 24px 55px -16px rgba(138, 75, 51, 0.28);
+    border-radius: 26px;
+    padding: 13px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .frame {
+    background: linear-gradient(180deg, rgba(255, 251, 249, 0.72), rgba(248, 234, 226, 0.8));
+    border: 1.5px solid rgba(197, 123, 92, 0.36);
+    box-shadow: inset 0 3px 15px rgba(143, 86, 63, 0.14);
+    border-radius: 20px;
+    padding: 46px 20px 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pearl {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 30%, #ffffff, #fff7f2 28%, #f0d2c2 68%, #c7947e);
+    box-shadow: 0 4px 8px rgba(112, 58, 38, 0.28);
+    position: absolute;
+  }
+
+  .flower {
+    position: absolute;
+    color: var(--terra);
+    opacity: 0.45;
+    font-size: 64px;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .action-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, var(--terra), var(--terra-dark));
+    box-shadow: 0 6px 14px rgba(159, 106, 88, 0.32);
+    transition: transform 0.2s ease;
+  }
+
+  .action-btn-group:hover .action-circle {
+    transform: translateY(-3px);
+  }
 </style>
 </head>
-<body>
-<div class="app">
-<header class="top">
-  <div class="brand">
-    <div class="script">Ateliê de Convites</div>
-    <small>Crie · Personalize · Partilhe</small>
-  </div>
-  <div id="topActions" class="hidden">
-    <button class="ghost" onclick="logout()">Sair da conta</button>
-  </div>
-</header>
+<body class="min-h-screen flex flex-col">
 
-<!-- LOGIN -->
-<section id="loginView" class="panel login">
-  <div style="text-align:center">
-    <div class="script" style="font-size:48px;color:#8a4b33">Bem-vindo</div>
-    <h1 class="screen-title">O seu espaço de criação</h1>
-    <p class="screen-desc">Acesso reservado ao editor. Os convidados entram apenas com o nome que receberam no convite.</p>
-  </div>
-  <label>Email
-    <input id="authEmail" class="field" type="email" value="reginaldomuanza83@gmail.com" autocomplete="username">
-  </label>
-  <label style="margin-top:12px">Palavra-passe
-    <input id="authPassword" class="field" type="password" placeholder="Mínimo de 6 caracteres" autocomplete="current-password">
-  </label>
-  <button class="btn" style="width:100%;margin-top:16px" onclick="login()">Entrar</button>
-  <p id="authError" class="muted" style="font-size:11px;text-align:center;margin-top:12px"></p>
-</section>
+  <!-- NAVBAR SUPERIOR -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-[#ead6cc]">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <!-- Marca -->
+      <div class="flex items-baseline gap-2 min-w-0">
+        <span class="script text-3xl sm:text-4xl text-[#8a4b33] leading-none truncate">Ateliê de Convites</span>
+        <span class="hidden md:inline text-[10px] uppercase tracking-[0.2em] text-[#8e7064] font-semibold">Estúdio</span>
+      </div>
 
-<!-- EDITOR -->
-<section id="editorView" class="hidden">
-  <div class="layout">
-    <main class="editor-area">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px">
+      <!-- Controles do topo: Menu de Abas + Botão Prévia + Sair -->
+      <div id="topActions" class="hidden items-center gap-2 sm:gap-2.5 flex-shrink-0">
+        <!-- Botão que abre/mostra as abas -->
+        <button
+          id="btnToggleTabs"
+          type="button"
+          onclick="toggleTabsDrawer()"
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#e3c7b8] bg-[#fffaf7] hover:bg-[#f7eae2] text-[#6d3b27] text-xs font-semibold transition cursor-pointer"
+          aria-expanded="false"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <span>Abas</span>
+          <span id="currentTabBadge" class="hidden sm:inline-block px-2 py-0.5 rounded-full bg-[#f2dfd4] text-[#8a4b33] text-[10px] font-bold">Evento</span>
+        </button>
+
+        <!-- Botão Prévia (leva exclusivamente para a aba Prévia) -->
+        <button
+          id="btnOpenPreview"
+          type="button"
+          onclick="openPreviewTab()"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#c78f7c] to-[#9e634f] hover:brightness-105 text-white text-xs font-semibold shadow-sm transition cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          <span>Prévia</span>
+        </button>
+
+        <!-- Botão Sair -->
+        <button
+          type="button"
+          onclick="logout()"
+          class="px-3 py-2 rounded-xl border border-[#ebd7cd] text-[#8a4b33] hover:bg-[#fff4ee] text-xs font-semibold transition cursor-pointer"
+        >
+          Sair
+        </button>
+      </div>
+    </div>
+
+    <!-- DRAWER / BARRA DE ABAS (Abre ao clicar no botão "Abas" no topo) -->
+    <nav id="tabsDrawer" class="hidden border-t border-[#eedad0] bg-[#fffaf7]">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-2">
+        <button type="button" data-tab-btn="0" onclick="selectTab(0)" class="tab-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
+          1. Evento
+        </button>
+        <button type="button" data-tab-btn="1" onclick="selectTab(1)" class="tab-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
+          2. Estilo &amp; Textos
+        </button>
+        <button type="button" data-tab-btn="2" onclick="selectTab(2)" class="tab-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
+          3. Convidados
+        </button>
+        <button type="button" data-tab-btn="3" onclick="selectTab(3)" class="tab-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
+          4. Respostas
+        </button>
+        <button type="button" data-tab-btn="4" onclick="selectTab(4)" class="tab-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
+          5. Publicar
+        </button>
+        <button type="button" data-tab-btn="5" onclick="selectTab(5)" class="tab-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
+          6. Prévia do Convite
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+    <!-- TELA DE LOGIN -->
+    <section id="loginView" class="max-w-md mx-auto my-8 bg-white rounded-3xl border border-[#ebd5ca] p-6 sm:p-8 shadow-sm">
+      <div class="text-center mb-6">
+        <div class="script text-5xl text-[#8a4b33] mb-1">Bem-vindo</div>
+        <h1 class="text-xl font-bold text-[#2b1d18]">Acesso ao Estúdio</h1>
+        <p class="text-xs text-[#85685c] mt-1">Entre com a sua conta de organizador para gerir o convite.</p>
+      </div>
+
+      <div class="space-y-4">
         <div>
-          <h1 class="screen-title" style="margin:0">Editor do convite</h1>
-          <p class="screen-desc" style="margin:2px 0 0">Edite os dados nas abas. As alterações são guardadas automaticamente.</p>
+          <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="authEmail">Email</label>
+          <input id="authEmail" type="email" value="reginaldomuanza83@gmail.com" autocomplete="username"
+            class="w-full rounded-xl border border-[#e3c8ba] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
         </div>
-        <span id="saveState" class="pill">A aguardar</span>
+        <div>
+          <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="authPassword">Palavra-passe</label>
+          <input id="authPassword" type="password" placeholder="Mínimo de 6 caracteres" autocomplete="current-password"
+            class="w-full rounded-xl border border-[#e3c8ba] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
+        </div>
+        <button type="button" onclick="login()"
+          class="w-full py-3 rounded-xl bg-gradient-to-r from-[#c78f7c] to-[#9e634f] hover:brightness-105 text-white text-sm font-semibold shadow-sm transition cursor-pointer">
+          Entrar
+        </button>
+      </div>
+      <p id="authError" class="text-xs text-red-700 text-center mt-4 min-h-[1rem]"></p>
+    </section>
+
+    <!-- ÁREA DO EDITOR (Apenas UMA aba ativa por vez; Prévia fica exclusivamente na aba 5) -->
+    <section id="editorView" class="hidden">
+      <!-- Cabeçalho da aba atual -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 bg-white rounded-2xl border border-[#ebd6cc] px-4 py-3.5">
+        <div>
+          <div class="text-[11px] uppercase tracking-wider font-semibold text-[#9c7262]">Aba ativa</div>
+          <h1 id="activeTabHeading" class="text-lg font-bold text-[#291b16]">Dados do Evento</h1>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <span id="saveState" class="px-3 py-1 rounded-full bg-[#f6e7df] text-[#8a4b33] text-xs font-semibold">A aguardar</span>
+        </div>
       </div>
 
-      <div class="code-editor">
-        <div class="code-tabs" id="codeTabs">
-          <button class="code-tab active" data-pane="0" onclick="switchTab(0)">📅 Evento</button>
-          <button class="code-tab" data-pane="1" onclick="switchTab(1)">🎨 Estilo</button>
-          <button class="code-tab" data-pane="2" onclick="switchTab(2)">👥 Convidados</button>
-          <button class="code-tab" data-pane="3" onclick="switchTab(3)">📊 Dashboard</button>
-          <button class="code-tab" data-pane="4" onclick="switchTab(4)">🚀 Publicar</button>
-        </div>
-
-        <div class="code-body">
-          <div class="code-gutter" id="codeGutter"></div>
-          <div class="code-content">
-
-            <!-- TAB 0: EVENTO -->
-            <div class="code-pane active" data-pane="0">
-              <div class="line"><span class="ln">1</span><span class="key">hosts</span><span class="punc">:</span> <input class="editor-input" id="hosts" value="Cristiano &amp; Avelina"></div>
-              <div class="line"><span class="ln">2</span><span class="key">type</span><span class="punc">:</span> <input class="editor-input" id="eventType" value="Casamento"></div>
-              <div class="line"><span class="ln">3</span><span class="key">date</span><span class="punc">:</span> <input class="editor-input" id="eventDate" type="date" value="2026-12-19"></div>
-              <div class="line"><span class="ln">4</span><span class="key">time</span><span class="punc">:</span> <input class="editor-input" id="eventTime" type="time" value="19:00"></div>
-              <div class="line"><span class="ln">5</span><span class="key">arrival</span><span class="punc">:</span> <input class="editor-input" id="arrivalTime" type="time" value="18:30"></div>
-              <div class="line"><span class="ln">6</span><span class="key">venue</span><span class="punc">:</span> <input class="editor-input" id="venue" value="Salão de Eventos Jardim Imperial"></div>
-              <div class="line"><span class="ln">7</span><span class="key">address</span><span class="punc">:</span> <input class="editor-input" id="address" value="Via Expressa, Talatona — Luanda, Angola"></div>
-              <div class="line"><span class="ln">8</span><span class="key">dress</span><span class="punc">:</span> <input class="editor-input" id="dress" value="Social completo / Esporte fino"></div>
-              <div class="line"><span class="ln">9</span><span class="key">deadline</span><span class="punc">:</span> <input class="editor-input" id="deadline" type="date" value="2026-12-05"></div>
-              <div class="line"><span class="ln">10</span><span class="key">message</span><span class="punc">:</span> <textarea class="editor-input" id="message" rows="2">Será uma alegria celebrar este momento consigo!</textarea></div>
-              <div class="line"><span class="ln">11</span><span class="key">whatsapp</span><span class="punc">:</span> <input class="editor-input" id="whatsapp" placeholder="244923000000" value="244923000000"></div>
+      <!-- ABA 0: EVENTO -->
+      <div id="tab-0" class="tab-panel bg-white rounded-3xl border border-[#ebd6cc] p-5 sm:p-7 shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="hosts">Anfitriões</label>
+            <input id="hosts" type="text" value="Cristiano &amp; Avelina"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="eventType">Tipo de evento</label>
+            <input id="eventType" type="text" value="Casamento"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="eventDate">Data</label>
+            <input id="eventDate" type="date" value="2026-12-19"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="eventTime">Hora</label>
+              <input id="eventTime" type="time" value="19:00"
+                class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
             </div>
-
-            <!-- TAB 1: ESTILO -->
-            <div class="code-pane" data-pane="1">
-              <div class="line"><span class="ln">1</span><span class="key">quote</span><span class="punc">:</span> <textarea class="editor-input" id="quote" rows="2">E disse o SENHOR Deus: Não é bom que o homem esteja só.</textarea></div>
-              <div class="line"><span class="ln">2</span><span class="key">quoteRef</span><span class="punc">:</span> <input class="editor-input" id="quoteRef" value="Génesis 2:18"></div>
-              <div class="line"><span class="ln">3</span><span class="key">closing</span><span class="punc">:</span> <input class="editor-input" id="closing" value="Esperamos por si!"></div>
-              <div class="line"><span class="ln">4</span><span class="key">accent</span><span class="punc">:</span>
-                <select class="editor-input" id="accent">
-                  <option value="#bd8673">Terracota (original)</option>
-                  <option value="#a87983">Rosa antigo</option>
-                  <option value="#9a8765">Dourado suave</option>
-                  <option value="#8b9a88">Verde sálvia</option>
-                </select>
-              </div>
-              <div class="line" style="margin-top:14px"><span class="ln">5</span><span class="key" style="color:#8a7a72;font-style:italic">// A pré-visualização ao lado atualiza em tempo real.</span></div>
+            <div>
+              <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="arrivalTime">Receção</label>
+              <input id="arrivalTime" type="time" value="18:30"
+                class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
             </div>
-
-            <!-- TAB 2: CONVIDADOS -->
-            <div class="code-pane" data-pane="2">
-              <div class="line"><span class="ln">1</span><span class="key">bulkNames</span><span class="punc">:</span> <textarea class="editor-input" id="bulkNames" rows="4" placeholder="Maria Fernanda Silva&#10;João Pedro Manuel&#10;Ana Costa"></textarea></div>
-              <div style="display:flex;gap:8px;margin-top:12px">
-                <button class="btn small" onclick="addGuests()">+ Adicionar convidados</button>
-                <button class="ghost small" onclick="copyAllLinks()">Copiar links</button>
-              </div>
-              <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center">
-                <span style="font-size:11px;color:#8a7a72">Convidados adicionados</span>
-                <span class="pill" id="guestCount">0 convidados</span>
-              </div>
-              <div id="guestList" style="margin-top:8px"></div>
-            </div>
-
-            <!-- TAB 3: DASHBOARD -->
-            <div class="code-pane" data-pane="3">
-              <div style="font-size:11px;color:#8a7a72;margin-bottom:12px">
-                <span class="key">dashboard</span> <span class="punc">:</span> resumo das respostas dos convidados
-              </div>
-              <div class="dashboard-grid">
-                <div class="dash-card accept">
-                  <b id="dashAccept">0</b>
-                  <small>Aceitaram</small>
-                </div>
-                <div class="dash-card decline">
-                  <b id="dashDecline">0</b>
-                  <small>Não vão</small>
-                </div>
-                <div class="dash-card pending">
-                  <b id="dashPending">0</b>
-                  <small>Pendentes</small>
-                </div>
-              </div>
-              <div style="font-size:11px;color:#8a7a72;margin:14px 0 8px">
-                <span class="key">respostas</span> <span class="punc">:</span> lista detalhada
-              </div>
-              <div id="dashList" class="dash-list"></div>
-            </div>
-
-            <!-- TAB 4: PUBLICAR -->
-            <div class="code-pane" data-pane="4">
-              <div class="line"><span class="ln">1</span><span class="key" style="color:#a8d08d">// Publicar evento</span></div>
-              <div class="line"><span class="ln">2</span><span class="key">status</span><span class="punc">:</span> <span id="publishStatus" class="str">Pronto para publicar</span></div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
-                <button class="btn small" onclick="publishEvent()">Guardar e publicar</button>
-                <button class="ghost small" onclick="copyAllLinks()">Copiar todos os links</button>
-              </div>
-              <div class="notice" style="margin-top:14px;background:#181514;border-color:#3f3733;color:#a8d08d;font-family:'Courier New',monospace;font-size:11px">
-                // O evento e os convidados serão gravados no Realtime Database.<br>
-                // Depois de publicar, os links podem ser abertos noutros telemóveis.
-              </div>
-              <div id="publishList" style="margin-top:14px"></div>
-            </div>
-
           </div>
-        </div>
-
-        <div class="code-footer">
-          <div class="status">
-            <span class="dot" id="saveDot"></span>
-            <span id="saveText">Ligado ao Realtime Database</span>
+          <div>
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="venue">Local / Salão</label>
+            <input id="venue" type="text" value="Salão de Eventos Jardim Imperial"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
           </div>
-          <div>UTF-8 · HTML/CSS/JS</div>
+          <div>
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="address">Endereço</label>
+            <input id="address" type="text" value="Via Expressa, Talatona — Luanda, Angola"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="dress">Dress code</label>
+            <input id="dress" type="text" value="Social completo / Esporte fino"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="whatsapp">WhatsApp (com código do país)</label>
+            <input id="whatsapp" type="text" value="244923000000"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="message">Mensagem principal</label>
+            <textarea id="message" rows="2"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">Será uma alegria celebrar este momento consigo!</textarea>
+          </div>
         </div>
       </div>
 
-      <div class="actions" style="display:flex;justify-content:space-between;gap:10px;margin-top:18px">
-        <button class="ghost" onclick="switchTab(Math.max(0,currentTab-1))">← Anterior</button>
-        <button class="btn" onclick="switchTab(Math.min(4,currentTab+1))">Seguinte →</button>
-      </div>
-    </main>
-
-    <!-- PREVIEW -->
-    <aside class="preview-wrap">
-      <p class="preview-head">PRÉ-VISUALIZAÇÃO DO CONVITE</p>
-      <div class="paper">
-        <div class="flower" style="top:-14px;left:-9px">✿</div>
-        <div class="flower" style="bottom:-18px;right:-8px">✿</div>
-        <div class="frame">
-          <span class="pearl" style="top:14px;right:35px"></span>
-          <span class="pearl" style="top:30px;left:22px;width:17px;height:17px"></span>
-          <p class="serif" style="font-size:13px;line-height:1.5;margin:0 auto 16px;max-width:270px">
-            <span id="pvQuote">E disse o SENHOR Deus: Não é bom que o homem esteja só.</span><br>
-            <b id="pvRef">Génesis 2:18</b>
-          </p>
-          <div class="pv-hosts" id="pvHosts">Cristiano &amp; Avelina</div>
-          <div class="pv-message" id="pvMessage">Será uma alegria celebrar este momento consigo!</div>
-          <div style="border-block:1px solid #231a17aa;padding:12px 0">
-            <div class="serif" id="pvType">Casamento · 19:00</div>
-            <div class="pv-date" id="pvDate">19 ♥ Dezembro ♥ 2026</div>
+      <!-- ABA 1: ESTILO & TEXTOS -->
+      <div id="tab-1" class="tab-panel hidden bg-white rounded-3xl border border-[#ebd6cc] p-5 sm:p-7 shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="quote">Citação ou versículo</label>
+            <textarea id="quote" rows="2"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">E disse o SENHOR Deus: Não é bom que o homem esteja só.</textarea>
           </div>
-          <div class="preview-details">
-            <div><b>✓</b>Presença</div>
-            <div><b>⌖</b>Local</div>
-            <div><b>♧</b>Traje</div>
+          <div>
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="quoteRef">Referência</label>
+            <input id="quoteRef" type="text" value="Génesis 2:18"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
           </div>
-          <div class="serif" id="pvClosing" style="font-size:22px;margin-top:22px">Esperamos por si!</div>
-        </div>
-      </div>
-      <p class="muted" style="font-size:10px;text-align:center;margin-top:10px">A aparência segue o estilo romântico do convite original.</p>
-    </aside>
-  </div>
-</section>
-
-<!-- GUEST VIEW -->
-<section id="guestView" class="guest-page hidden" style="max-width:480px;margin:0 auto">
-  <div id="guestGate" class="panel" style="margin:20px 0">
-    <div class="script" style="font-size:44px;color:#8a4b33;text-align:center">Um convite especial</div>
-    <h2 class="screen-title" style="text-align:center">Identifique o seu convite</h2>
-    <p class="screen-desc" style="text-align:center">Digite o seu nome para abrir o convite.</p>
-    <label>Nome do convidado
-      <input id="guestLookupName" class="field" placeholder="O seu nome completo">
-    </label>
-    <button class="btn" style="width:100%;margin-top:13px" onclick="findGuestByName()">Entrar no convite</button>
-    <p id="guestLookupError" class="muted" style="font-size:11px;text-align:center"></p>
-  </div>
-
-  <div id="guestContent" class="hidden">
-    <main class="invite-original">
-      <div id="guestStatus" class="hidden" style="background:#fff;border:1px solid #e8b69d;border-radius:15px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#8a4b33"></div>
-      <div class="paper">
-        <div class="frame" style="padding:55px 19px 35px;position:relative;overflow:hidden">
-          <span class="flower" style="top:-12px;left:-12px">✿</span>
-          <span class="flower" style="bottom:-16px;right:-10px">✿</span>
-          <span class="pearl" style="top:16px;right:34px"></span>
-          <span class="pearl" style="top:40px;left:24px;width:16px;height:16px"></span>
-          <div style="font-family:'Cormorant Garamond';font-size:14px;line-height:1.55;margin-bottom:18px" id="gQuote">
-            E disse o SENHOR Deus: Não é bom que o homem esteja só.<br><b>Génesis 2:18</b>
+          <div>
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="closing">Frase de encerramento</label>
+            <input id="closing" type="text" value="Esperamos por si!"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
           </div>
-          <div class="script" id="gHosts" style="font-size:57px;line-height:1.05;color:#231a17">Cristiano &amp; Avelina</div>
-          <p id="gMessage" style="font-family:'Cormorant Garamond';font-size:19px;margin:17px 0">Será uma alegria celebrar este momento consigo!</p>
-          <div style="border-block:1px solid #231a17;padding:12px 0;margin-top:12px">
-            <div class="serif" id="gType" style="font-size:19px">Casamento</div>
-            <div id="gDate" style="font-weight:700;font-size:18px;margin-top:4px">19 ♥ Dezembro ♥ 2026</div>
-          </div>
-          <p style="font-family:'Cormorant Garamond';font-size:16px;margin:20px 0 14px;font-weight:600">Clique nos ícones para acessar!</p>
-          <div class="action-grid">
-            <button class="action-btn-group" id="rsvpActionBtn" onclick="handleRsvpAction()">
-              <span class="action-circle">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M8.5 12.2l2.5 2.5 5-5.2"/></svg>
-              </span>
-              <span id="rsvpBtnLabel">Confirmar<br>presença</span>
-            </button>
-            <button class="action-btn-group" onclick="openGuestModal('modal-location')">
-              <span class="action-circle">
-                <svg viewBox="0 0 24 24"><path d="M12 21c-4.5-4.8-7-8.2-7-11.5a7 7 0 1 1 14 0c0 3.3-2.5 6.7-7 11.5z"/><circle cx="12" cy="9.5" r="2.6"/></svg>
-              </span>
-              <span>Local<br>do evento</span>
-            </button>
-            <button class="action-btn-group" onclick="openGuestModal('modal-manual')">
-              <span class="action-circle">
-                <svg viewBox="0 0 24 24"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H11v18H4.5A2.5 2.5 0 0 0 2 23zM22 5.5A2.5 2.5 0 0 0 19.5 3H13v18h6.5A2.5 2.5 0 0 1 22 23z"/></svg>
-              </span>
-              <span>Manual do<br>convidado</span>
-            </button>
-            <button class="action-btn-group" onclick="openGuestModal('modal-dresscode')">
-              <span class="action-circle">
-                <svg viewBox="0 0 24 24"><path d="M12 7a2 2 0 1 0-2-2M12 7v2.5M12 9.5L3.5 15.8A1.5 1.5 0 0 0 4.4 18.5h15.2a1.5 1.5 0 0 0 .9-2.7z"/></svg>
-              </span>
-              <span>Dress<br>code</span>
-            </button>
-          </div>
-          <p id="gClosing" style="font-family:'Cormorant Garamond';font-size:21px;margin-top:22px">Esperamos por si!</p>
-        </div>
-      </div>
-      <div class="countdown-box">
-        <div style="font-family:'Cormorant Garamond';font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#8a4b33;margin-bottom:8px">Contagem regressiva para o grande dia</div>
-        <div class="countdown-grid">
-          <div><b id="cd-days">--</b><small>Dias</small></div>
-          <div><b id="cd-hours">--</b><small>Horas</small></div>
-          <div><b id="cd-mins">--</b><small>Min</small></div>
-          <div><b id="cd-secs">--</b><small>Seg</small></div>
-        </div>
-      </div>
-    </main>
-
-    <div id="modal-rsvp" class="guest-modal hidden">
-      <div class="guest-modal-box">
-        <button class="modal-x" onclick="closeGuestModal('modal-rsvp')">×</button>
-        <h2>Confirme a sua presença</h2>
-        <p class="muted">Este convite foi preparado para <b id="modalGuestName"></b>.</p>
-        <form onsubmit="sendGuestRSVP(event)">
-          <label>Contacto
-            <input id="rsvpPhone" class="field" placeholder="Telefone / WhatsApp">
-          </label>
-          <div class="radio-line">
-            <label><input type="radio" name="attend" value="Sim" required> Sim, estarei presente</label>
-            <label><input type="radio" name="attend" value="Não"> Não poderei ir</label>
-          </div>
-          <label>Acompanhantes
-            <select id="rsvpCompanions" class="field">
-              <option value="0">Nenhum</option>
-              <option value="1">1 acompanhante</option>
-              <option value="2">2 acompanhantes</option>
-              <option value="3">3 acompanhantes</option>
+          <div>
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="accent">Paleta de destaque</label>
+            <select id="accent"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
+              <option value="#bd8673">Terracota</option>
+              <option value="#a87983">Rosa antigo</option>
+              <option value="#9a8765">Dourado suave</option>
+              <option value="#8b9a88">Verde sálvia</option>
             </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="deadline">Data limite de confirmação</label>
+            <input id="deadline" type="date" value="2026-12-05"
+              class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA 2: CONVIDADOS -->
+      <div id="tab-2" class="tab-panel hidden bg-white rounded-3xl border border-[#ebd6cc] p-5 sm:p-7 shadow-sm space-y-5">
+        <div>
+          <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="bulkNames">
+            Adicionar nomes (um por linha ou separados por vírgula)
           </label>
-          <label>Mensagem
-            <textarea id="rsvpNote" class="field" rows="2"></textarea>
-          </label>
-          <button class="btn" style="width:100%">Enviar resposta</button>
-        </form>
-        <p id="rsvpResult" class="notice hidden"></p>
-      </div>
-    </div>
+          <textarea id="bulkNames" rows="4" placeholder="Maria Fernanda Silva&#10;João Pedro Manuel&#10;Ana Costa"
+            class="w-full rounded-xl border border-[#e4c9bb] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]"></textarea>
+          <div class="flex flex-wrap gap-2.5 mt-3">
+            <button type="button" onclick="addGuests()"
+              class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#c78f7c] to-[#9e634f] text-white text-xs font-semibold cursor-pointer">
+              + Adicionar convidados
+            </button>
+            <button type="button" onclick="copyAllLinks()"
+              class="px-4 py-2.5 rounded-xl border border-[#e3c7b8] bg-[#fffaf7] text-[#8a4b33] text-xs font-semibold cursor-pointer">
+              Copiar links
+            </button>
+          </div>
+        </div>
 
-    <div id="modal-location" class="guest-modal hidden">
-      <div class="guest-modal-box">
-        <button class="modal-x" onclick="closeGuestModal('modal-location')">×</button>
-        <h2>Local do evento</h2>
-        <p><b id="gVenue"></b></p>
-        <p id="gAddress" class="muted"></p>
-        <p id="gArrival"></p>
+        <div class="pt-4 border-t border-[#f0e0d7]">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-bold text-[#2d1e19]">Lista de convidados</span>
+            <span id="guestCount" class="px-3 py-1 rounded-full bg-[#f6e7df] text-[#8a4b33] text-xs font-semibold">0 convidados</span>
+          </div>
+          <div id="guestList" class="space-y-2"></div>
+        </div>
       </div>
-    </div>
 
-    <div id="modal-manual" class="guest-modal hidden">
-      <div class="guest-modal-box">
-        <button class="modal-x" onclick="closeGuestModal('modal-manual')">×</button>
-        <h2>Manual do convidado</h2>
-        <p id="gManual" class="muted" style="line-height:1.8"></p>
-        <p>Pedimos que chegue a tempo e respeite as orientações dos anfitriões. Agradecemos a sua presença neste dia especial.</p>
+      <!-- ABA 3: RESPOSTAS (DASHBOARD) -->
+      <div id="tab-3" class="tab-panel hidden bg-white rounded-3xl border border-[#ebd6cc] p-5 sm:p-7 shadow-sm space-y-5">
+        <div class="grid grid-cols-3 gap-3">
+          <div class="rounded-2xl bg-[#f1fbf1] border border-[#cde8cd] p-4 text-center">
+            <div id="dashAccept" class="serif text-3xl font-bold text-[#2d6a2d]">0</div>
+            <div class="text-[11px] uppercase tracking-wider text-[#3d6b3d] font-semibold mt-0.5">Aceitaram</div>
+          </div>
+          <div class="rounded-2xl bg-[#fdf2f2] border border-[#f0d0d0] p-4 text-center">
+            <div id="dashDecline" class="serif text-3xl font-bold text-[#8a2d2d]">0</div>
+            <div class="text-[11px] uppercase tracking-wider text-[#8a3a3a] font-semibold mt-0.5">Não vão</div>
+          </div>
+          <div class="rounded-2xl bg-[#fff8f3] border border-[#eed7ca] p-4 text-center">
+            <div id="dashPending" class="serif text-3xl font-bold text-[#8a4b33]">0</div>
+            <div class="text-[11px] uppercase tracking-wider text-[#8e7064] font-semibold mt-0.5">Pendentes</div>
+          </div>
+        </div>
+
+        <div id="dashList" class="space-y-2"></div>
       </div>
-    </div>
 
-    <div id="modal-dresscode" class="guest-modal hidden">
-      <div class="guest-modal-box">
-        <button class="modal-x" onclick="closeGuestModal('modal-dresscode')">×</button>
-        <h2>Dress code</h2>
-        <p id="gDress" class="muted" style="font-size:18px"></p>
-        <p>Vista-se de forma elegante e confortável para celebrar connosco.</p>
+      <!-- ABA 4: PUBLICAR -->
+      <div id="tab-4" class="tab-panel hidden bg-white rounded-3xl border border-[#ebd6cc] p-5 sm:p-7 shadow-sm space-y-5">
+        <div class="rounded-2xl bg-[#fff9f5] border border-[#ebd6cc] p-4">
+          <div class="text-xs font-semibold text-[#8e7064]">Estado da publicação</div>
+          <div id="publishStatus" class="text-base font-bold text-[#2d1e19] mt-0.5">Pronto para publicar</div>
+          <p class="text-xs text-[#7c6055] mt-1">
+            Guarde e publique o evento para que os convidados possam abrir o link e confirmar presença.
+          </p>
+          <div class="flex flex-wrap gap-2.5 mt-4">
+            <button type="button" onclick="publishEvent()"
+              class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#c78f7c] to-[#9e634f] text-white text-xs font-semibold cursor-pointer">
+              Guardar e publicar
+            </button>
+            <button type="button" onclick="copyAllLinks()"
+              class="px-4 py-2.5 rounded-xl border border-[#e3c7b8] bg-white text-[#8a4b33] text-xs font-semibold cursor-pointer">
+              Copiar todos os links
+            </button>
+          </div>
+        </div>
+
+        <div id="publishList" class="space-y-2"></div>
+      </div>
+
+      <!-- ABA 5: PRÉVIA (EXCLUSIVA DESTA ABA) -->
+      <div id="tab-5" class="tab-panel hidden">
+        <div class="max-w-md mx-auto">
+          <div class="paper">
+            <div class="flower" style="top:-14px;left:-9px">✿</div>
+            <div class="flower" style="bottom:-18px;right:-8px">✿</div>
+            <div class="frame">
+              <span class="pearl" style="top:14px;right:35px"></span>
+              <span class="pearl" style="top:30px;left:22px;width:17px;height:17px"></span>
+
+              <p class="serif text-sm leading-relaxed mx-auto mb-4 max-w-[270px]">
+                <span id="pvQuote">E disse o SENHOR Deus: Não é bom que o homem esteja só.</span><br>
+                <b id="pvRef">Génesis 2:18</b>
+              </p>
+
+              <div id="pvHosts" class="script text-5xl sm:text-6xl leading-none text-[#231a17] break-words">Cristiano &amp; Avelina</div>
+              <div id="pvMessage" class="serif text-lg my-4">Será uma alegria celebrar este momento consigo!</div>
+
+              <div class="border-y border-[#231a17]/60 py-3 my-3">
+                <div id="pvType" class="serif text-base">Casamento · 19:00</div>
+                <div id="pvDate" class="text-base sm:text-lg font-bold mt-1">19 ♥ Dezembro ♥ 2026</div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 mt-5 text-[11px]">
+                <div><b class="block text-lg text-[#a56f5d] mb-0.5">✓</b>Presença</div>
+                <div><b class="block text-lg text-[#a56f5d] mb-0.5">⌖</b>Local</div>
+                <div><b class="block text-lg text-[#a56f5d] mb-0.5">♧</b>Traje</div>
+              </div>
+
+              <div id="pvClosing" class="serif text-2xl mt-6">Esperamos por si!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rodapé de navegação entre abas -->
+      <div class="flex items-center justify-between gap-3 mt-6">
+        <button type="button" onclick="prevTab()"
+          class="px-4 py-2.5 rounded-xl border border-[#e3c7b8] bg-white hover:bg-[#fff6f0] text-[#8a4b33] text-xs font-semibold transition cursor-pointer">
+          ← Aba anterior
+        </button>
+        <button type="button" onclick="nextTab()"
+          class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#c78f7c] to-[#9e634f] hover:brightness-105 text-white text-xs font-semibold transition cursor-pointer">
+          Próxima aba →
+        </button>
+      </div>
+    </section>
+
+    <!-- VISÃO DO CONVIDADO -->
+    <section id="guestView" class="hidden max-w-md mx-auto">
+      <div id="guestGate" class="bg-white rounded-3xl border border-[#ebd6cc] p-6 sm:p-7 shadow-sm my-4">
+        <div class="script text-5xl text-[#8a4b33] text-center">Um convite especial</div>
+        <h2 class="text-lg font-bold text-center text-[#291b16] mt-1">Identifique o seu convite</h2>
+        <p class="text-xs text-[#85685c] text-center mt-1 mb-4">Digite o seu nome para abrir o convite.</p>
+        <label class="block text-xs font-semibold text-[#6f5043] mb-1.5" for="guestLookupName">Nome do convidado</label>
+        <input id="guestLookupName" type="text" placeholder="O seu nome completo"
+          class="w-full rounded-xl border border-[#e3c8ba] bg-[#fffdfb] px-3.5 py-2.5 text-sm outline-none focus:border-[#bd8673]">
+        <button type="button" onclick="findGuestByName()"
+          class="w-full py-3 rounded-xl bg-gradient-to-r from-[#c78f7c] to-[#9e634f] text-white text-sm font-semibold mt-3.5 cursor-pointer">
+          Entrar no convite
+        </button>
+        <p id="guestLookupError" class="text-xs text-red-700 text-center mt-3 min-h-[1rem]"></p>
+      </div>
+
+      <div id="guestContent" class="hidden">
+        <div id="guestStatus" class="hidden bg-white border border-[#e8b69d] rounded-2xl px-4 py-2.5 mb-3 text-xs font-semibold text-[#8a4b33]"></div>
+
+        <div class="paper">
+          <div class="flower" style="top:-12px;left:-12px">✿</div>
+          <div class="flower" style="bottom:-16px;right:-10px">✿</div>
+          <div class="frame">
+            <span class="pearl" style="top:16px;right:34px"></span>
+            <span class="pearl" style="top:40px;left:24px;width:16px;height:16px"></span>
+
+            <div id="gQuote" class="serif text-sm leading-relaxed mb-4">
+              E disse o SENHOR Deus: Não é bom que o homem esteja só.<br><b>Génesis 2:18</b>
+            </div>
+            <div id="gHosts" class="script text-5xl sm:text-6xl leading-none text-[#231a17] break-words">Cristiano &amp; Avelina</div>
+            <p id="gMessage" class="serif text-lg my-4">Será uma alegria celebrar este momento consigo!</p>
+
+            <div class="border-y border-[#231a17]/70 py-3 my-3">
+              <div id="gType" class="serif text-lg">Casamento</div>
+              <div id="gDate" class="font-bold text-lg mt-1">19 ♥ Dezembro ♥ 2026</div>
+            </div>
+
+            <p class="serif text-base font-semibold mt-5 mb-3">Toque num ícone para abrir:</p>
+
+            <div class="grid grid-cols-4 gap-2 my-2">
+              <button type="button" id="rsvpActionBtn" onclick="handleRsvpAction()" class="action-btn-group flex flex-col items-center gap-2 serif font-bold text-xs text-[#231a17] cursor-pointer">
+                <span class="action-circle">
+                  <svg class="w-6 h-6 text-[#231a17]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9"/><path d="M8.5 12.2l2.5 2.5 5-5.2"/>
+                  </svg>
+                </span>
+                <span id="rsvpBtnLabel">Confirmar<br>presença</span>
+              </button>
+
+              <button type="button" onclick="openGuestModal('modal-location')" class="action-btn-group flex flex-col items-center gap-2 serif font-bold text-xs text-[#231a17] cursor-pointer">
+                <span class="action-circle">
+                  <svg class="w-6 h-6 text-[#231a17]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 21c-4.5-4.8-7-8.2-7-11.5a7 7 0 1 1 14 0c0 3.3-2.5 6.7-7 11.5z"/><circle cx="12" cy="9.5" r="2.5"/>
+                  </svg>
+                </span>
+                <span>Local<br>do evento</span>
+              </button>
+
+              <button type="button" onclick="openGuestModal('modal-manual')" class="action-btn-group flex flex-col items-center gap-2 serif font-bold text-xs text-[#231a17] cursor-pointer">
+                <span class="action-circle">
+                  <svg class="w-6 h-6 text-[#231a17]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H11v18H4.5A2.5 2.5 0 0 0 2 23zM22 5.5A2.5 2.5 0 0 0 19.5 3H13v18h6.5A2.5 2.5 0 0 1 22 23z"/>
+                  </svg>
+                </span>
+                <span>Manual do<br>convidado</span>
+              </button>
+
+              <button type="button" onclick="openGuestModal('modal-dresscode')" class="action-btn-group flex flex-col items-center gap-2 serif font-bold text-xs text-[#231a17] cursor-pointer">
+                <span class="action-circle">
+                  <svg class="w-6 h-6 text-[#231a17]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 7a2 2 0 1 0-2-2M12 7v2.5M12 9.5L3.5 15.8A1.5 1.5 0 0 0 4.4 18.5h15.2a1.5 1.5 0 0 0 .9-2.7z"/>
+                  </svg>
+                </span>
+                <span>Dress<br>code</span>
+              </button>
+            </div>
+
+            <p id="gClosing" class="serif text-xl mt-6">Esperamos por si!</p>
+          </div>
+        </div>
+
+        <div class="mt-4 bg-white/85 border border-white rounded-2xl p-4 text-center shadow-sm">
+          <div class="serif text-xs uppercase tracking-[0.18em] text-[#8a4b33] mb-2">Contagem regressiva</div>
+          <div class="grid grid-cols-4 gap-2 max-w-xs mx-auto">
+            <div class="bg-[#fdf8f5] border border-[#f3d5c5] rounded-xl p-2">
+              <b id="cd-days" class="block serif text-xl font-bold">--</b>
+              <small class="text-[9px] uppercase text-[#8a4b33]">Dias</small>
+            </div>
+            <div class="bg-[#fdf8f5] border border-[#f3d5c5] rounded-xl p-2">
+              <b id="cd-hours" class="block serif text-xl font-bold">--</b>
+              <small class="text-[9px] uppercase text-[#8a4b33]">Horas</small>
+            </div>
+            <div class="bg-[#fdf8f5] border border-[#f3d5c5] rounded-xl p-2">
+              <b id="cd-mins" class="block serif text-xl font-bold">--</b>
+              <small class="text-[9px] uppercase text-[#8a4b33]">Min</small>
+            </div>
+            <div class="bg-[#fdf8f5] border border-[#f3d5c5] rounded-xl p-2">
+              <b id="cd-secs" class="block serif text-xl font-bold">--</b>
+              <small class="text-[9px] uppercase text-[#8a4b33]">Seg</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAIS DO CONVIDADO -->
+  <div id="modal-rsvp" class="hidden fixed inset-0 z-50 bg-[#281a16]/65 flex items-center justify-center p-4">
+    <div class="relative w-full max-w-md max-h-[85vh] overflow-y-auto rounded-3xl bg-[#fcf6f2] border border-white p-6 shadow-xl">
+      <button type="button" onclick="closeGuestModal('modal-rsvp')" class="absolute right-4 top-3 text-2xl text-[#8a4b33] cursor-pointer">×</button>
+      <h2 class="serif text-2xl font-bold text-[#8a4b33] mb-1">Confirme a sua presença</h2>
+      <p class="text-xs text-[#7d6054] mb-4">Convite preparado para <b id="modalGuestName"></b>.</p>
+      <form onsubmit="sendGuestRSVP(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-[#6f5043] mb-1" for="rsvpPhone">Contacto</label>
+          <input id="rsvpPhone" type="text" placeholder="Telefone / WhatsApp"
+            class="w-full rounded-xl border border-[#e3c8ba] bg-white px-3 py-2 text-sm outline-none focus:border-[#bd8673]">
+        </div>
+        <div class="flex items-center gap-5 py-1 text-xs font-medium">
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="attend" value="Sim" required> Sim, estarei presente</label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="attend" value="Não"> Não poderei ir</label>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#6f5043] mb-1" for="rsvpCompanions">Acompanhantes</label>
+          <select id="rsvpCompanions" class="w-full rounded-xl border border-[#e3c8ba] bg-white px-3 py-2 text-sm outline-none focus:border-[#bd8673]">
+            <option value="0">Nenhum</option>
+            <option value="1">1 acompanhante</option>
+            <option value="2">2 acompanhantes</option>
+            <option value="3">3 acompanhantes</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#6f5043] mb-1" for="rsvpNote">Mensagem</label>
+          <textarea id="rsvpNote" rows="2" class="w-full rounded-xl border border-[#e3c8ba] bg-white px-3 py-2 text-sm outline-none focus:border-[#bd8673]"></textarea>
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#c78f7c] to-[#9e634f] text-white text-sm font-semibold cursor-pointer">
+          Enviar resposta
+        </button>
+      </form>
+      <p id="rsvpResult" class="hidden mt-3 rounded-xl bg-white border border-[#ebd6cc] p-3 text-xs text-[#6f5043]"></p>
+    </div>
+  </div>
+
+  <div id="modal-location" class="hidden fixed inset-0 z-50 bg-[#281a16]/65 flex items-center justify-center p-4">
+    <div class="relative w-full max-w-md rounded-3xl bg-[#fcf6f2] border border-white p-6 shadow-xl">
+      <button type="button" onclick="closeGuestModal('modal-location')" class="absolute right-4 top-3 text-2xl text-[#8a4b33] cursor-pointer">×</button>
+      <h2 class="serif text-2xl font-bold text-[#8a4b33] mb-2">Local do evento</h2>
+      <p id="gVenue" class="font-bold text-sm text-[#291b16]"></p>
+      <p id="gAddress" class="text-xs text-[#7d6054] mt-1"></p>
+      <p id="gArrival" class="text-xs font-semibold text-[#8a4b33] mt-3"></p>
+    </div>
+  </div>
+
+  <div id="modal-manual" class="hidden fixed inset-0 z-50 bg-[#281a16]/65 flex items-center justify-center p-4">
+    <div class="relative w-full max-w-md rounded-3xl bg-[#fcf6f2] border border-white p-6 shadow-xl">
+      <button type="button" onclick="closeGuestModal('modal-manual')" class="absolute right-4 top-3 text-2xl text-[#8a4b33] cursor-pointer">×</button>
+      <h2 class="serif text-2xl font-bold text-[#8a4b33] mb-2">Manual do convidado</h2>
+      <p id="gManual" class="text-sm text-[#6f5043] leading-relaxed"></p>
+      <p class="text-xs text-[#85685c] mt-3 leading-relaxed">Agradecemos a sua pontualidade e carinho neste dia especial.</p>
+    </div>
+  </div>
+
+  <div id="modal-dresscode" class="hidden fixed inset-0 z-50 bg-[#281a16]/65 flex items-center justify-center p-4">
+    <div class="relative w-full max-w-md rounded-3xl bg-[#fcf6f2] border border-white p-6 shadow-xl">
+      <button type="button" onclick="closeGuestModal('modal-dresscode')" class="absolute right-4 top-3 text-2xl text-[#8a4b33] cursor-pointer">×</button>
+      <h2 class="serif text-2xl font-bold text-[#8a4b33] mb-2">Dress code</h2>
+      <p id="gDress" class="serif text-xl font-semibold text-[#291b16]"></p>
+      <p class="text-xs text-[#7d6054] mt-2">Vista-se de forma elegante e confortável para celebrar connosco.</p>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMAÇÃO CUSTOMIZADO (Substitui confirm()) -->
+  <div id="confirmModal" class="hidden fixed inset-0 z-50 bg-[#281a16]/65 flex items-center justify-center p-4">
+    <div class="w-full max-w-sm rounded-3xl bg-white border border-[#ebd6cc] p-6 shadow-xl text-center">
+      <h3 class="text-base font-bold text-[#291b16]">Confirmar ação</h3>
+      <p id="confirmMessage" class="text-xs text-[#7d6054] mt-2 mb-5"></p>
+      <div class="flex gap-2.5 justify-center">
+        <button type="button" id="confirmCancelBtn" class="px-4 py-2 rounded-xl border border-[#e3c7b8] text-xs font-semibold text-[#6f5043] cursor-pointer">Cancelar</button>
+        <button type="button" id="confirmOkBtn" class="px-4 py-2 rounded-xl bg-[#a83a3a] text-white text-xs font-semibold cursor-pointer">Confirmar</button>
       </div>
     </div>
   </div>
-</section>
 
-<div id="toast" class="toast hidden"></div>
-</div>
+  <!-- TOAST -->
+  <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 rounded-full bg-[#241915] text-white px-5 py-2.5 text-xs font-medium shadow-lg"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -877,13 +628,24 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 const $ = id => document.getElementById(id);
 
+const TAB_TITLES = [
+  "Dados do Evento",
+  "Estilo & Textos",
+  "Convidados",
+  "Respostas & Resumo",
+  "Publicar Convite",
+  "Prévia do Convite"
+];
+
 let user = null;
 let eventId = localStorage.getItem('fastinvite_event_id') || crypto.randomUUID();
 let guests = [];
 let currentTab = 0;
+let tabsDrawerOpen = false;
 let guestDoc = null;
 let guestEventId = null;
 let eventData = {};
+let saveTimer = null;
 
 const defaults = {
   hosts: 'Cristiano & Avelina',
@@ -903,109 +665,151 @@ const defaults = {
   accent: '#bd8673'
 };
 
-function toast(s) {
-  $('toast').textContent = s;
-  $('toast').classList.remove('hidden');
-  setTimeout(() => $('toast').classList.add('hidden'), 2600);
+function toast(msg) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.add('hidden'), 2600);
+}
+
+function askConfirm(message) {
+  return new Promise(resolve => {
+    $('confirmMessage').textContent = message;
+    $('confirmModal').classList.remove('hidden');
+
+    const cleanup = ans => {
+      $('confirmModal').classList.add('hidden');
+      $('confirmOkBtn').removeEventListener('click', onOk);
+      $('confirmCancelBtn').removeEventListener('click', onCancel);
+      resolve(ans);
+    };
+    const onOk = () => cleanup(true);
+    const onCancel = () => cleanup(false);
+
+    $('confirmOkBtn').addEventListener('click', onOk);
+    $('confirmCancelBtn').addEventListener('click', onCancel);
+  });
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
 }
 
 function dateDecor(d) {
   if (!d) return 'Data a definir';
   const x = new Date(d + 'T12:00:00');
+  if (Number.isNaN(x.getTime())) return 'Data a definir';
   return `${x.getDate()} ♥ ${x.toLocaleDateString('pt-PT', { month: 'long' })} ♥ ${x.getFullYear()}`;
 }
 
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }[c]));
+/* === NAVBAR: BOTÃO DE ABAS & BOTÃO PRÉVIA === */
+function toggleTabsDrawer() {
+  tabsDrawerOpen = !tabsDrawerOpen;
+  $('tabsDrawer').classList.toggle('hidden', !tabsDrawerOpen);
+  $('btnToggleTabs').setAttribute('aria-expanded', String(tabsDrawerOpen));
+  syncTabButtons();
 }
 
+function openPreviewTab() {
+  tabsDrawerOpen = false;
+  $('tabsDrawer').classList.add('hidden');
+  $('btnToggleTabs').setAttribute('aria-expanded', 'false');
+  selectTab(5);
+}
+
+function prevTab() {
+  selectTab(currentTab - 1);
+}
+
+function nextTab() {
+  selectTab(currentTab + 1);
+}
+
+function selectTab(index) {
+  currentTab = Math.max(0, Math.min(5, index));
+
+  document.querySelectorAll('.tab-panel').forEach((panel, i) => {
+    panel.classList.toggle('hidden', i !== currentTab);
+  });
+
+  $('activeTabHeading').textContent = TAB_TITLES[currentTab];
+  $('currentTabBadge').textContent = TAB_TITLES[currentTab].split(' ')[0];
+
+  syncTabButtons();
+
+  if (currentTab === 3) renderDashboard();
+  if (currentTab === 4) renderPublish();
+  if (currentTab === 5) updatePreviewOnly();
+}
+
+function syncTabButtons() {
+  document.querySelectorAll('.tab-nav-btn').forEach(btn => {
+    const idx = Number(btn.getAttribute('data-tab-btn'));
+    const active = idx === currentTab;
+    btn.className = active
+      ? 'tab-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#8a4b33] text-white transition cursor-pointer'
+      : 'tab-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-[#e7cfc3] text-[#6f5043] hover:bg-[#f7eae2] transition cursor-pointer';
+  });
+}
+
+/* === DADOS & PRÉVIA === */
 function readFields() {
-  const map = {
-    hosts: 'hosts',
-    eventType: 'type',
-    eventDate: 'date',
-    eventTime: 'time',
-    arrivalTime: 'arrival',
-    venue: 'venue',
-    address: 'address',
-    dress: 'dress',
-    deadline: 'deadline',
-    message: 'message',
-    whatsapp: 'whatsapp',
-    quote: 'quote',
-    quoteRef: 'quoteRef',
-    closing: 'closing',
-    accent: 'accent'
+  return {
+    hosts: $('hosts').value.trim(),
+    type: $('eventType').value.trim(),
+    date: $('eventDate').value.trim(),
+    time: $('eventTime').value.trim(),
+    arrival: $('arrivalTime').value.trim(),
+    venue: $('venue').value.trim(),
+    address: $('address').value.trim(),
+    dress: $('dress').value.trim(),
+    deadline: $('deadline').value.trim(),
+    message: $('message').value.trim(),
+    whatsapp: $('whatsapp').value.trim(),
+    quote: $('quote').value.trim(),
+    quoteRef: $('quoteRef').value.trim(),
+    closing: $('closing').value.trim(),
+    accent: $('accent').value.trim()
   };
-  const o = {};
-  for (const [id, k] of Object.entries(map)) {
-    o[k] = $(id).value.trim();
-  }
-  return o;
 }
 
 function fillFields() {
-  const map = {
-    hosts: 'hosts',
-    eventType: 'type',
-    eventDate: 'date',
-    eventTime: 'time',
-    arrivalTime: 'arrival',
-    venue: 'venue',
-    address: 'address',
-    dress: 'dress',
-    deadline: 'deadline',
-    message: 'message',
-    whatsapp: 'whatsapp',
-    quote: 'quote',
-    quoteRef: 'quoteRef',
-    closing: 'closing',
-    accent: 'accent'
-  };
-  for (const [id, k] of Object.entries(map)) {
-    $(id).value = eventData[k] ?? '';
-  }
+  $('hosts').value = eventData.hosts ?? '';
+  $('eventType').value = eventData.type ?? '';
+  $('eventDate').value = eventData.date ?? '';
+  $('eventTime').value = eventData.time ?? '';
+  $('arrivalTime').value = eventData.arrival ?? '';
+  $('venue').value = eventData.venue ?? '';
+  $('address').value = eventData.address ?? '';
+  $('dress').value = eventData.dress ?? '';
+  $('deadline').value = eventData.deadline ?? '';
+  $('message').value = eventData.message ?? '';
+  $('whatsapp').value = eventData.whatsapp ?? '';
+  $('quote').value = eventData.quote ?? '';
+  $('quoteRef').value = eventData.quoteRef ?? '';
+  $('closing').value = eventData.closing ?? '';
+  $('accent').value = eventData.accent ?? '#bd8673';
 }
 
-function preview() {
+function updatePreviewOnly() {
   const e = readFields();
   $('pvHosts').textContent = e.hosts || 'Os anfitriões';
-  $('pvMessage').textContent = e.message;
-  $('pvType').textContent = `${e.type} · ${e.time}`;
+  $('pvMessage').textContent = e.message || '';
+  $('pvType').textContent = `${e.type || 'Evento'} · ${e.time || ''}`;
   $('pvDate').textContent = dateDecor(e.date);
-  $('pvQuote').textContent = e.quote;
-  $('pvRef').textContent = e.quoteRef;
-  $('pvClosing').textContent = e.closing;
-  document.documentElement.style.setProperty('--terra', e.accent);
-  document.documentElement.style.setProperty('--accent', e.accent);
+  $('pvQuote').textContent = e.quote || '';
+  $('pvRef').textContent = e.quoteRef || '';
+  $('pvClosing').textContent = e.closing || '';
+  document.documentElement.style.setProperty('--terra', e.accent || '#bd8673');
 }
-
-function setSave(s) {
-  $('saveState').textContent = s;
-}
-
-function setStatus(text, type) {
-  $('saveText').textContent = text;
-  const dot = $('saveDot');
-  dot.className = 'dot';
-  if (type === 'dirty') dot.classList.add('dirty');
-  if (type === 'error') dot.classList.add('error');
-}
-
-let saveTimer;
 
 function scheduleSave() {
-  preview();
-  setSave('A guardar…');
-  setStatus('A guardar…', 'dirty');
+  $('saveState').textContent = 'A guardar…';
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveDraft, 700);
+  saveTimer = setTimeout(saveDraft, 650);
 }
 
 async function saveDraft() {
@@ -1018,61 +822,22 @@ async function saveDraft() {
       updatedAt: Date.now()
     });
     localStorage.setItem('fastinvite_event_id', eventId);
-    setSave('Guardado na nuvem');
-    setStatus('Ligado ao Realtime Database', 'ok');
+    $('saveState').textContent = 'Guardado';
   } catch (e) {
-    setSave('Falha ao guardar');
-    setStatus('Falha ao guardar', 'error');
     console.error(e);
-    toast('Não foi possível guardar. Verifique as regras do Realtime Database.');
+    $('saveState').textContent = 'Erro ao guardar';
+    toast('Não foi possível guardar.');
   }
 }
 
-/* === CODE TABS === */
-function switchTab(n) {
-  currentTab = Math.max(0, Math.min(4, n));
-  document.querySelectorAll('.code-tab').forEach((el, i) => {
-    el.classList.toggle('active', i === currentTab);
-  });
-  document.querySelectorAll('.code-pane').forEach((el, i) => {
-    el.classList.toggle('active', i === currentTab);
-  });
-  renderGutter();
-  if (currentTab === 3) renderDashboard();
-  if (currentTab === 4) renderPublish();
-}
-
-function renderGutter() {
-  const pane = document.querySelector('.code-pane.active');
-  if (!pane) return;
-  const lines = pane.querySelectorAll('.line').length || 1;
-  const g = $('codeGutter');
-  g.innerHTML = '';
-  for (let i = 1; i <= lines; i++) {
-    const s = document.createElement('span');
-    s.textContent = i;
-    g.appendChild(s);
-  }
-}
-
-/* === LOGIN / AUTH === */
+/* === AUTENTICAÇÃO === */
 async function login() {
-  const email = $('authEmail').value.trim();
-  const password = $('authPassword').value;
+  $('authError').textContent = '';
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(auth, $('authEmail').value.trim(), $('authPassword').value);
   } catch (e) {
-    $('authError').textContent = authError(e);
+    $('authError').textContent = e.message || 'Falha ao iniciar sessão.';
   }
-}
-
-function authError(e) {
-  return ({
-    'auth/invalid-email': 'Email inválido.',
-    'auth/invalid-credential': 'Email ou palavra-passe incorretos.',
-    'auth/user-not-found': 'Conta do editor não encontrada.',
-    'auth/too-many-requests': 'Muitas tentativas. Tente mais tarde.'
-  })[e.code] || e.message;
 }
 
 async function logout() {
@@ -1083,18 +848,24 @@ const guestRoute = new URLSearchParams(location.search).has('evento');
 
 onAuthStateChanged(auth, async u => {
   user = u;
+  const topActions = $('topActions');
   if (guestRoute) {
+    topActions.classList.add('hidden');
+    topActions.classList.remove('flex');
     $('loginView').classList.add('hidden');
     $('editorView').classList.add('hidden');
     $('guestView').classList.remove('hidden');
     return;
   }
+
   $('loginView').classList.toggle('hidden', !!u);
   $('editorView').classList.toggle('hidden', !u);
-  $('topActions').classList.toggle('hidden', !u);
+  topActions.classList.toggle('hidden', !u);
+  topActions.classList.toggle('flex', !!u);
+
   if (u) {
     await loadEvent();
-    switchTab(0);
+    selectTab(0);
   }
 });
 
@@ -1103,7 +874,7 @@ async function loadEvent() {
     const snap = await get(ref(db, `events/${eventId}`));
     if (snap.exists()) {
       const d = snap.val();
-      if (d.ownerId !== user.uid) {
+      if (d.ownerId && d.ownerId !== user.uid) {
         eventId = crypto.randomUUID();
         localStorage.setItem('fastinvite_event_id', eventId);
         eventData = { ...defaults };
@@ -1111,6 +882,7 @@ async function loadEvent() {
         eventData = { ...defaults, ...(d.eventData || {}) };
       }
     } else {
+      eventData = { ...defaults };
       await set(ref(db, `events/${eventId}`), {
         ownerId: user.uid,
         eventData,
@@ -1118,15 +890,11 @@ async function loadEvent() {
       });
     }
     fillFields();
-    preview();
     await loadGuests();
-    setSave('Ligado ao Realtime Database');
-    setStatus('Ligado ao Realtime Database', 'ok');
+    $('saveState').textContent = 'Sincronizado';
   } catch (e) {
     console.error(e);
-    setSave('Verifique o Realtime Database');
-    setStatus('Erro de ligação', 'error');
-    toast('Não foi possível carregar. Confirme o databaseURL e as regras.');
+    $('saveState').textContent = 'Offline / Verificar DB';
   }
 }
 
@@ -1145,11 +913,19 @@ async function loadGuests() {
   }
 }
 
-/* === GUESTS === */
+/* === CONVIDADOS === */
 async function nameKey(name) {
   const bytes = new TextEncoder().encode(name.trim().toLocaleLowerCase());
   const digest = await crypto.subtle.digest('SHA-256', bytes);
   return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function inviteUrl() {
+  const u = new URL(location.href);
+  u.search = '';
+  u.hash = '';
+  u.searchParams.set('evento', eventId);
+  return u.href;
 }
 
 async function addGuests() {
@@ -1167,45 +943,40 @@ async function addGuests() {
       added++;
     } catch (e) {
       console.error(e);
-      toast('Erro ao guardar convidado no Realtime Database.');
+      toast('Erro ao guardar convidado.');
       break;
     }
   }
   $('bulkNames').value = '';
   renderGuests();
   renderDashboard();
-  toast(`${added} convidado(s) guardado(s) na base de dados.`);
-}
-
-function inviteUrl() {
-  const u = new URL(location.href);
-  u.search = '';
-  u.hash = '';
-  u.searchParams.set('evento', eventId);
-  return u.href;
+  toast(`${added} convidado(s) adicionado(s).`);
 }
 
 function renderGuests() {
   $('guestCount').textContent = `${guests.length} convidados`;
   $('guestList').innerHTML = guests.map(g => {
     const st = g.attendance || g.status || 'Pendente';
-    const cls = st === 'Sim' ? 'accept' : (st === 'Não' ? 'decline' : 'pending');
+    const badge = st === 'Sim'
+      ? 'bg-emerald-100 text-emerald-800'
+      : (st === 'Não' ? 'bg-rose-100 text-rose-800' : 'bg-[#f6e7df] text-[#8a4b33]');
     return `
-      <div class="guest-row">
-        <div class="info">
-          <strong>${esc(g.name)}</strong>
-          <small>${esc(st)}</small>
+      <div class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 bg-[#fffdfb] border border-[#f0dcd2] rounded-2xl px-3.5 py-2.5">
+        <div class="min-w-0 flex-1">
+          <div class="text-xs font-bold text-[#291b16] truncate">${esc(g.name)}</div>
+          <span class="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${badge}">${esc(st)}</span>
         </div>
-        <span class="pill ${cls}">${esc(st)}</span>
-        <button class="ghost small" onclick="editGuest('${g.id}')">Editar</button>
-        <button class="ghost small" onclick="shareGuest('${g.id}')">Partilhar</button>
-        <button class="ghost small" onclick="removeGuest('${g.id}')">×</button>
+        <div class="flex items-center gap-1.5">
+          <button type="button" onclick="shareGuest('${g.id}')" class="px-2.5 py-1.5 rounded-lg border border-[#e3c7b8] text-[11px] font-semibold text-[#8a4b33] hover:bg-[#f7eae2] cursor-pointer">Partilhar</button>
+          <button type="button" onclick="removeGuest('${g.id}')" class="px-2.5 py-1.5 rounded-lg border border-rose-200 text-[11px] font-semibold text-rose-700 hover:bg-rose-50 cursor-pointer">Remover</button>
+        </div>
       </div>`;
-  }).join('') || '<p class="muted" style="font-size:12px;text-align:center;padding:20px">Ainda não adicionou convidados.</p>';
+  }).join('') || '<p class="text-xs text-[#8e7064] text-center py-6">Nenhum convidado adicionado ainda.</p>';
 }
 
 async function removeGuest(id) {
-  if (!confirm('Remover este convidado?')) return;
+  const ok = await askConfirm('Deseja remover este convidado?');
+  if (!ok) return;
   try {
     const g = guests.find(x => x.id === id);
     await remove(ref(db, `events/${eventId}/guests/${id}`));
@@ -1217,30 +988,8 @@ async function removeGuest(id) {
     renderDashboard();
     toast('Convidado removido.');
   } catch (e) {
-    toast('Não foi possível remover.');
-  }
-}
-
-async function editGuest(id) {
-  const g = guests.find(x => x.id === id);
-  if (!g) return;
-  const novo = prompt('Editar nome do convidado:', g.name);
-  if (novo === null) return;
-  const nome = novo.trim();
-  if (!nome) return toast('O nome não pode ficar vazio.');
-  try {
-    if (nome.toLowerCase() !== g.name.toLowerCase()) {
-      await remove(ref(db, `events/${eventId}/guestLookup/${await nameKey(g.name)}`));
-      await set(ref(db, `events/${eventId}/guestLookup/${await nameKey(nome)}`), id);
-    }
-    await update(ref(db, `events/${eventId}/guests/${id}`), { name: nome });
-    g.name = nome;
-    renderGuests();
-    renderDashboard();
-    toast('Convidado atualizado.');
-  } catch (e) {
     console.error(e);
-    toast('Não foi possível editar.');
+    toast('Não foi possível remover.');
   }
 }
 
@@ -1248,25 +997,35 @@ async function shareGuest(id) {
   const g = guests.find(x => x.id === id);
   if (!g) return;
   const url = inviteUrl();
-  const text = `Olá ${g.name}! Para abrir o seu convite, aceda ao link e escreva o seu nome: ${url}`;
+  const text = `Olá ${g.name}! Abra o link e digite o seu nome para ver o convite: ${url}`;
   if (navigator.share) {
     try {
-      await navigator.share({ title: 'O seu convite', text, url });
-    } catch (e) {}
-  } else {
-    await navigator.clipboard.writeText(text);
-    toast('Link copiado.');
+      await navigator.share({ title: 'Convite', text, url });
+      return;
+    } catch (_) {}
   }
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  ta.remove();
+  toast('Link copiado.');
 }
 
 async function copyAllLinks() {
   if (!guests.length) return toast('Adicione convidados primeiro.');
   const t = guests.map(g => `${g.name}: ${inviteUrl()}`).join('\n');
-  await navigator.clipboard.writeText(t);
-  toast('Mensagens e links copiados.');
+  const ta = document.createElement('textarea');
+  ta.value = t;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  ta.remove();
+  toast('Links copiados.');
 }
 
-/* === DASHBOARD === */
+/* === RESPOSTAS & PUBLICAR === */
 function renderDashboard() {
   const accept = guests.filter(g => (g.attendance || g.status) === 'Sim');
   const decline = guests.filter(g => (g.attendance || g.status) === 'Não');
@@ -1274,64 +1033,40 @@ function renderDashboard() {
     const st = g.attendance || g.status;
     return st !== 'Sim' && st !== 'Não';
   });
+
   $('dashAccept').textContent = accept.length;
   $('dashDecline').textContent = decline.length;
   $('dashPending').textContent = pending.length;
 
-  const list = [];
-  if (accept.length) {
-    list.push('<div style="font-size:10px;color:#2d6a2d;font-weight:700;margin:8px 0 4px">✓ ACEITARAM</div>');
-    accept.forEach(g => {
-      list.push(`<div class="dash-item">
-        <div class="info"><strong>${esc(g.name)}</strong><small>${g.companions ? g.companions + ' acompanhante(s)' : 'Sem acompanhantes'}</small></div>
-        <span class="pill accept">Sim</span>
-      </div>`);
-    });
-  }
-  if (decline.length) {
-    list.push('<div style="font-size:10px;color:#8a2d2d;font-weight:700;margin:12px 0 4px">✗ NÃO VÃO</div>');
-    decline.forEach(g => {
-      list.push(`<div class="dash-item">
-        <div class="info"><strong>${esc(g.name)}</strong><small>Não poderá comparecer</small></div>
-        <span class="pill decline">Não</span>
-      </div>`);
-    });
-  }
-  if (pending.length) {
-    list.push('<div style="font-size:10px;color:#8a4b33;font-weight:700;margin:12px 0 4px">⏳ PENDENTES</div>');
-    pending.forEach(g => {
-      list.push(`<div class="dash-item">
-        <div class="info"><strong>${esc(g.name)}</strong><small>Ainda não respondeu</small></div>
-        <span class="pill pending">Pendente</span>
-      </div>`);
-    });
-  }
-  if (!guests.length) {
-    list.push('<p class="muted" style="font-size:12px;text-align:center;padding:20px">Sem convidados. Adicione na aba Convidados.</p>');
-  }
-  $('dashList').innerHTML = list.join('');
+  $('dashList').innerHTML = guests.map(g => {
+    const st = g.attendance || g.status || 'Pendente';
+    return `
+      <div class="flex items-center justify-between gap-2 bg-[#fffdfb] border border-[#f0dcd2] rounded-xl px-3.5 py-2.5 text-xs">
+        <div>
+          <span class="font-bold text-[#291b16]">${esc(g.name)}</span>
+          <span class="text-[#8e7064] ml-2">${g.companions ? `+${g.companions} acomp.` : ''}</span>
+        </div>
+        <span class="font-semibold text-[#8a4b33]">${esc(st)}</span>
+      </div>`;
+  }).join('') || '<p class="text-xs text-[#8e7064] text-center py-4">Sem registos de convidados.</p>';
 }
 
-/* === PUBLISH === */
 function renderPublish() {
   $('publishList').innerHTML = guests.map(g => `
-    <div class="guest-row">
-      <div class="info">
-        <strong>${esc(g.name)}</strong>
-        <small>${esc(g.attendance || g.status || 'Pendente')}</small>
-      </div>
-      <button class="ghost small" onclick="shareGuest('${g.id}')">Enviar convite</button>
-    </div>`).join('') || '<p class="muted" style="font-size:12px">Adicione convidados na etapa anterior.</p>';
+    <div class="flex items-center justify-between gap-2 bg-[#fffdfb] border border-[#f0dcd2] rounded-xl px-3.5 py-2.5 text-xs">
+      <span class="font-semibold text-[#291b16]">${esc(g.name)}</span>
+      <button type="button" onclick="shareGuest('${g.id}')" class="px-3 py-1 rounded-lg border border-[#e3c7b8] text-[#8a4b33] font-semibold cursor-pointer">Enviar link</button>
+    </div>`).join('') || '<p class="text-xs text-[#8e7064]">Adicione convidados na aba Convidados.</p>';
 }
 
 async function publishEvent() {
   await saveDraft();
-  $('publishStatus').textContent = 'Publicado com sucesso!';
-  toast('Evento guardado e publicado.');
+  $('publishStatus').textContent = 'Publicado com sucesso';
+  toast('Evento publicado.');
   renderPublish();
 }
 
-/* === GUEST PAGE === */
+/* === CONVIDADO === */
 function showGuestPage(e, g) {
   guestDoc = g;
   eventData = e;
@@ -1346,34 +1081,25 @@ function showGuestPage(e, g) {
   $('gQuote').innerHTML = `${esc(e.quote || '')}<br><b>${esc(e.quoteRef || '')}</b>`;
   $('gVenue').textContent = e.venue || '';
   $('gAddress').textContent = e.address || '';
-  $('gArrival').textContent = 'Recepção a partir das ' + (e.arrival || '');
+  $('gArrival').textContent = 'Receção a partir das ' + (e.arrival || '');
   $('gDress').textContent = e.dress || '';
-  $('gManual').textContent = e.message || 'Agradecemos por fazer parte deste momento especial.';
-
+  $('gManual').textContent = e.message || 'Agradecemos a sua presença.';
   $('modalGuestName').textContent = g.name;
 
   const st = g.attendance;
   $('guestStatus').textContent = st ? `Resposta registada: ${st}` : '';
   $('guestStatus').classList.toggle('hidden', !st);
-
   updateRsvpButton(st);
-
-  if (st) {
-    $('rsvpPhone').value = g.phone || '';
-    $('rsvpCompanions').value = String(g.companions || 0);
-    const r = document.querySelector(`input[name="attend"][value="${st}"]`);
-    if (r) r.checked = true;
-  }
 
   if (e.date) {
     const target = new Date(`${e.date}T${e.time || '19:00'}:00`).getTime();
-    function tick() {
+    const tick = () => {
       const d = Math.max(0, target - Date.now());
       $('cd-days').textContent = String(Math.floor(d / 86400000)).padStart(2, '0');
       $('cd-hours').textContent = String(Math.floor(d % 86400000 / 3600000)).padStart(2, '0');
       $('cd-mins').textContent = String(Math.floor(d % 3600000 / 60000)).padStart(2, '0');
       $('cd-secs').textContent = String(Math.floor(d % 60000 / 1000)).padStart(2, '0');
-    }
+    };
     tick();
     setInterval(tick, 1000);
   }
@@ -1381,13 +1107,13 @@ function showGuestPage(e, g) {
 
 function updateRsvpButton(st) {
   const label = $('rsvpBtnLabel');
-  const btn = $('rsvpActionBtn');
+  const circle = $('rsvpActionBtn').querySelector('.action-circle');
   if (st === 'Sim') {
     label.innerHTML = 'Cancelar<br>presença';
-    btn.querySelector('.action-circle').style.background = 'linear-gradient(145deg,#c74c4c,#a83a3a)';
+    circle.style.background = 'linear-gradient(145deg,#c74c4c,#9c2f2f)';
   } else {
     label.innerHTML = 'Confirmar<br>presença';
-    btn.querySelector('.action-circle').style.background = 'linear-gradient(145deg,#C78F7C,#B07764)';
+    circle.style.background = 'linear-gradient(145deg,var(--terra),var(--terra-dark))';
   }
 }
 
@@ -1400,26 +1126,24 @@ async function findGuestByName() {
   try {
     const snap = await get(ref(db, `events/${guestEventId}/guests`));
     const all = snap.val() || {};
-    const match = Object.entries(all).find(([id, g]) =>
+    const match = Object.entries(all).find(([, g]) =>
       (g.name || '').trim().toLocaleLowerCase() === name.toLocaleLowerCase()
     );
     if (!match) {
-      $('guestLookupError').textContent = 'Nome não encontrado. Verifique a escrita.';
+      $('guestLookupError').textContent = 'Nome não encontrado.';
       return;
     }
     const ev = await get(ref(db, `events/${guestEventId}/eventData`));
-    if (!ev.exists()) throw Error('Evento não encontrado');
+    if (!ev.exists()) throw new Error('Evento não encontrado');
     showGuestPage(ev.val(), { id: match[0], ...match[1] });
   } catch (e) {
     console.error(e);
-    $('guestLookupError').textContent = 'Não foi possível carregar o convite.';
+    $('guestLookupError').textContent = 'Não foi possível abrir o convite.';
   }
 }
 
-/* === RSVP === */
 function handleRsvpAction() {
-  const st = guestDoc?.attendance;
-  if (st === 'Sim') {
+  if (guestDoc?.attendance === 'Sim') {
     cancelAttendance();
   } else {
     openGuestModal('modal-rsvp');
@@ -1427,22 +1151,19 @@ function handleRsvpAction() {
 }
 
 async function cancelAttendance() {
-  if (!confirm('Tem a certeza que deseja cancelar a sua presença?')) return;
+  const ok = await askConfirm('Deseja cancelar a sua presença?');
+  if (!ok) return;
   try {
-    const data = {
-      attendance: 'Não',
-      companions: 0,
-      respondedAt: Date.now()
-    };
+    const data = { attendance: 'Não', companions: 0, respondedAt: Date.now() };
     await update(ref(db, `events/${guestEventId}/guests/${guestDoc.id}`), data);
     guestDoc = { ...guestDoc, ...data };
     updateRsvpButton('Não');
     $('guestStatus').textContent = 'Resposta registada: Não';
     $('guestStatus').classList.remove('hidden');
-    toast('Presença cancelada. Os anfitriões foram informados.');
+    toast('Presença cancelada.');
   } catch (e) {
     console.error(e);
-    toast('Não foi possível cancelar. Tente novamente.');
+    toast('Não foi possível cancelar.');
   }
 }
 
@@ -1463,50 +1184,32 @@ async function sendGuestRSVP(ev) {
   const phone = $('rsvpPhone').value.trim();
   const companions = attending === 'Sim' ? Number($('rsvpCompanions').value) : 0;
   const note = $('rsvpNote').value.trim();
-  const data = {
-    attendance: attending,
-    phone,
-    companions,
-    note,
-    respondedAt: Date.now()
-  };
+  const data = { attendance: attending, phone, companions, note, respondedAt: Date.now() };
   try {
     await update(ref(db, `events/${guestEventId}/guests/${guestDoc.id}`), data);
     guestDoc = { ...guestDoc, ...data };
     $('rsvpResult').classList.remove('hidden');
-    $('rsvpResult').textContent = attending === 'Sim'
-      ? 'A sua resposta foi enviada. Obrigado!'
-      : 'Resposta enviada. Obrigado por avisar os anfitriões.';
+    $('rsvpResult').textContent = 'Resposta enviada com sucesso.';
     $('guestStatus').textContent = `Resposta registada: ${attending}`;
     $('guestStatus').classList.remove('hidden');
     updateRsvpButton(attending);
     closeGuestModal('modal-rsvp');
-    toast('Resposta enviada aos anfitriões.');
-
-    if (attending === 'Sim' && eventData.whatsapp) {
-      const waNumber = String(eventData.whatsapp).replace(/\D/g, '');
-      const msg = encodeURIComponent(
-        `Olá! Sou ${guestDoc.name} e acabei de confirmar a minha presença no vosso casamento.\n` +
-        `Contacto: ${phone || '—'}\n` +
-        `Acompanhantes: ${companions}\n` +
-        (note ? `Mensagem: ${note}\n` : '') +
-        `Mal posso esperar para celebrar convosco!`
-      );
-      const waUrl = `https://wa.me/${waNumber}?text=${msg}`;
-      setTimeout(() => window.open(waUrl, '_blank'), 500);
-    }
+    toast('Resposta enviada.');
   } catch (e) {
     console.error(e);
-    toast('Não foi possível enviar a resposta.');
+    toast('Erro ao enviar resposta.');
   }
 }
 
-/* === WINDOW EXPORTS === */
 window.login = login;
 window.logout = logout;
+window.toggleTabsDrawer = toggleTabsDrawer;
+window.openPreviewTab = openPreviewTab;
+window.prevTab = prevTab;
+window.nextTab = nextTab;
+window.selectTab = selectTab;
 window.addGuests = addGuests;
 window.removeGuest = removeGuest;
-window.editGuest = editGuest;
 window.shareGuest = shareGuest;
 window.copyAllLinks = copyAllLinks;
 window.publishEvent = publishEvent;
@@ -1514,11 +1217,9 @@ window.findGuestByName = findGuestByName;
 window.openGuestModal = openGuestModal;
 window.closeGuestModal = closeGuestModal;
 window.sendGuestRSVP = sendGuestRSVP;
-window.switchTab = switchTab;
 window.handleRsvpAction = handleRsvpAction;
 
-/* === INIT === */
-document.querySelectorAll('.code-pane input, .code-pane textarea, .code-pane select').forEach(el => {
+document.querySelectorAll('.tab-panel input, .tab-panel textarea, .tab-panel select').forEach(el => {
   el.addEventListener('input', scheduleSave);
 });
 
@@ -1530,8 +1231,6 @@ if (params.get('evento')) {
   $('editorView').classList.add('hidden');
   $('topActions').classList.add('hidden');
 }
-
-renderGutter();
 </script>
 </body>
 </html>
