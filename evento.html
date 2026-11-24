@@ -41,11 +41,11 @@ body{
 .line{width:85%;height:1px;background:#54372d;margin:20px auto 50px}
 .instruction{font-size:25px;margin-bottom:20px}
 .buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-width:430px;margin:auto}
-.item{border:0;background:none;color:#241714;font-family:inherit;cursor:pointer}
+.item{border:0;background:none;color:#241714;font-family:Arial,sans-serif;cursor:pointer}
 .circle{width:78px;height:78px;max-width:19vw;max-height:19vw;border-radius:50%;background:#cd9079;display:grid;place-items:center;margin:auto auto 8px;transition:.2s}
 .item:hover .circle{transform:translateY(-5px);background:#e5ad96}
 .circle svg{width:47px;height:47px;stroke:#1d110d;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.item span:last-child{display:block;font-size:15px;line-height:1.1}
+.item span:last-child{display:block;font-family:Arial,sans-serif;font-size:18px;font-weight:700;line-height:1.15}
 .closing{font-size:29px;margin:50px 0 10px}
 .flower{position:absolute;z-index:1;font-size:95px;color:#d18b72;text-shadow:1px 3px 5px #a45e4b55;pointer-events:none}
 .one{top:-12px;left:-15px}.two{top:-12px;right:-15px;transform:rotate(35deg)}
@@ -74,7 +74,7 @@ body{
  .instruction{font-size:21px}
  .circle{width:65px;height:65px}
  .circle svg{width:39px;height:39px}
- .item span:last-child{font-size:12px}
+ .item span:last-child{font-size:15px;font-weight:700;line-height:1.15}
  .closing{font-size:25px}
  .line{margin-bottom:40px}
 }
@@ -115,7 +115,7 @@ body{
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {getDatabase,ref,get,push,set} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+import {getDatabase,ref,get,push,set,runTransaction} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
 const firebaseConfig={
  apiKey:"AIzaSyDTRZaE58HzRK7NC0PYNn1IipGSLL1P85g",
@@ -213,6 +213,13 @@ function render(){
  `;
 }
 
+async function nameClaimKey(fullName){
+ const normalized=String(fullName||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/\s+/g," ");
+ const bytes=new TextEncoder().encode(normalized);
+ const digest=await crypto.subtle.digest("SHA-256",bytes);
+ return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
 window.openPanel=function(type){
  $("overlay").classList.add("active");
  let title="",html="";
@@ -291,6 +298,23 @@ window.openPanel=function(type){
     button.disabled=true;button.textContent="A enviar…";
     try{
      const newRef=push(ref(db,"rsvps/"+EVENT_ID));
+     const claimNames=[name,...(record.companionDetails||[]).map(c=>c.name)];
+     const normalized=claimNames.map(n=>n.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/\s+/g," "));
+     if(new Set(normalized).size!==normalized.length)throw new Error("DUPLICATE_WITHIN_INVITATION");
+     const claims=[];
+     for(const personName of claimNames){
+      const claimKey=await nameClaimKey(personName);
+      claims.push({name:personName,ref:ref(db,`rsvpClaims/${EVENT_ID}/${claimKey}`)});
+     }
+     // Verifica todos os nomes antes de reservar qualquer um, para evitar bloqueios parciais.
+     for(const claim of claims){
+      const existing=await get(claim.ref);
+      if(existing.exists())throw new Error("DUPLICATE_NAME:"+claim.name);
+     }
+     for(const claim of claims){
+      const result=await runTransaction(claim.ref,current=>current===null?{rsvpId:newRef.key,createdAt:Date.now()}:undefined,{applyLocally:false});
+      if(!result.committed)throw new Error("DUPLICATE_NAME:"+claim.name);
+     }
      await set(newRef,record);
      feedback.textContent="Resposta guardada! A abrir o WhatsApp…";
      const phone=String(data.whatsapp||"").replace(/\D/g,"");
@@ -302,7 +326,12 @@ window.openPanel=function(type){
       window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`,"_blank","noopener");
      }else feedback.textContent="Resposta guardada, mas o WhatsApp do casal ainda não foi configurado no painel index.html.";
     }catch(error){
-     console.error(error);feedback.textContent="Não foi possível enviar. Tente novamente.";
+     console.error(error);
+     feedback.textContent=error.message?.startsWith("DUPLICATE_NAME:")
+      ? `O nome “${error.message.split(":").slice(1).join(":")}” já está associado a outro convite. Verifique o nome do convidado e dos acompanhantes.`
+      : error.message==="DUPLICATE_WITHIN_INVITATION"
+       ? "O convidado e os acompanhantes não podem ter nomes repetidos no mesmo convite."
+       : "Não foi possível enviar. Tente novamente.";
      button.disabled=false;button.textContent="Tentar novamente";
     }
    });
