@@ -139,9 +139,9 @@ body{
 
 .buttons{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:7px;
-  max-width:430px;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:5px;
+  max-width:520px;
   margin:auto;
 }
 
@@ -154,10 +154,10 @@ body{
 }
 
 .circle{
-  width:78px;
-  height:78px;
-  max-width:19vw;
-  max-height:19vw;
+  width:60px;
+  height:60px;
+  max-width:14vw;
+  max-height:14vw;
   border-radius:50%;
   background:#cd9079;
   display:grid;
@@ -172,8 +172,8 @@ body{
 }
 
 .circle svg{
-  width:47px;
-  height:47px;
+  width:36px;
+  height:36px;
   stroke:#1d110d;
   stroke-width:2;
   fill:none;
@@ -184,7 +184,7 @@ body{
 .item span:last-child{
   display:block;
   font-family:Arial,sans-serif;
-  font-size:18px;
+  font-size:13px;
   font-weight:700;
   line-height:1.15;
 }
@@ -503,19 +503,20 @@ body{
   .instruction{
     font-size:21px;
   }
-
+  .buttons{gap:3px}
   .circle{
-    width:65px;
-    height:65px;
+    width:48px;
+    height:48px;
+    max-width:14vw;
+    max-height:14vw;
+    margin-bottom:6px;
   }
-
   .circle svg{
-    width:39px;
-    height:39px;
+    width:29px;
+    height:29px;
   }
-
   .item span:last-child{
-    font-size:15px;
+    font-size:10px;
     font-weight:700;
     line-height:1.15;
   }
@@ -799,6 +800,18 @@ function render(){
         <span>Dress<br>code</span>
       </button>
 
+      <button class="item" onclick="openPanel('tables')">
+        <div class="circle">
+          <svg viewBox="0 0 48 48">
+            <rect x="5" y="7" width="16" height="13" rx="2"/>
+            <rect x="27" y="7" width="16" height="13" rx="2"/>
+            <rect x="5" y="28" width="16" height="13" rx="2"/>
+            <rect x="27" y="28" width="16" height="13" rx="2"/>
+          </svg>
+        </div>
+        <span>Organização<br>das mesas</span>
+      </button>
+
     </div>
 
     <p class="closing">${safe(data.closing)}</p>
@@ -839,6 +852,30 @@ window.openPanel = function(type){
     `;
   }
 
+
+  if (type === "tables"){
+    title = "Organização das mesas";
+    const tables = Array.isArray(data.tablePlan?.tables) ? data.tablePlan.tables : [];
+    html = `
+      <p>Pesquise o seu nome para descobrir em qual mesa ficará. Também pode consultar a organização completa.</p>
+      <label style="display:block;margin:14px 0 8px;font-weight:700">Pesquisar convidado
+        <input id="tableGuestSearch" class="table-search-field" type="search" placeholder="Digite o seu nome completo">
+      </label>
+      <div id="tableSearchResult" class="detail-block">Digite o seu nome para localizar a sua mesa.</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;color:#8e5b49;margin:20px 0 8px">Lista de mesas</h3>
+      <div id="publicTableList">
+        ${tables.length ? tables.map((table, i) => `
+          <div class="detail-block">
+            <b>${safe(table.name || `Mesa ${i+1}`)}</b>
+            <div>${(Array.isArray(table.guests) && table.guests.length)
+              ? table.guests.map(person => `<div>• ${safe(person)}</div>`).join("")
+              : "<em>Ainda sem convidados atribuídos.</em>"}</div>
+          </div>
+        `).join("") : '<p>As mesas ainda não foram organizadas. Consulte novamente mais tarde.</p>'}
+      </div>
+    `;
+  }
+
   if (type === "location"){
     title = "Local do evento";
     html = `
@@ -863,6 +900,27 @@ window.openPanel = function(type){
 
   $("modalTitle").textContent   = title;
   $("modalContent").innerHTML   = html;
+
+  if (type === "tables"){
+    const search = $("tableGuestSearch");
+    const result = $("tableSearchResult");
+    const tables = Array.isArray(data.tablePlan?.tables) ? data.tablePlan.tables : [];
+    search.addEventListener("input", () => {
+      const query = search.value.trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ");
+      if (!query){
+        result.textContent = "Digite o seu nome para localizar a sua mesa.";
+        return;
+      }
+      const matches = [];
+      tables.forEach((table, i) => (table.guests || []).forEach(person => {
+        const normalized = String(person).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+        if (normalized.includes(query)) matches.push({person, table:table.name || `Mesa ${i+1}`});
+      }));
+      result.innerHTML = matches.length
+        ? matches.map(m => `<div><b>${safe(m.person)}</b><br>Sua mesa: <strong>${safe(m.table)}</strong></div>`).join("<hr>")
+        : "Não encontrámos esse nome. Confirme a escrita ou contacte os noivos.";
+    });
+  }
 
   if (type === "rsvp"){
     const area = $("rsvpFormArea");

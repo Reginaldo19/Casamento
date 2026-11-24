@@ -496,6 +496,45 @@ label{
   color:var(--c-8a4b33);
   font-size:10px;
 }
+.table-admin-card{
+  background:#fff;
+  border:1px solid var(--c-f0d9ce);
+  border-radius:13px;
+  padding:13px;
+  margin:10px 0;
+}
+.table-admin-card h3{
+  margin:0 0 9px;
+  color:var(--c-8a4b33);
+  font:600 21px 'Cormorant Garamond',serif;
+}
+.table-person-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(125px, .8fr);
+  gap:10px;
+  align-items:center;
+  border-top:1px solid var(--c-f0dfd7);
+  padding:9px 0;
+  font-size:11px;
+}
+.table-person-row select{
+  width:100%;
+  border:1px solid var(--c-e6cabb);
+  border-radius:8px;
+  background:#fff;
+  padding:9px;
+  color:var(--c-382923);
+  font:inherit;
+}
+.table-head-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:space-between;
+}
+@media(max-width:480px){
+  .table-person-row{grid-template-columns:1fr;gap:5px}
+}
 
 .inline-actions{
   display:flex;
@@ -941,6 +980,35 @@ label{
       </div>
     </section>
 
+    <section class="tab" id="tab-tables">
+      <h2 class="screen-title">Organização das mesas</h2>
+      <p class="screen-desc">
+        Crie as mesas com o nome que desejar e atribua cada convidado confirmado
+        (incluindo acompanhantes) à respetiva mesa. As alterações serão publicadas
+        no convite para consulta dos convidados.
+      </p>
+
+      <div class="formgrid">
+        <label class="span2">Nome da mesa
+          <input class="field" id="newTableName" maxlength="60"
+                 placeholder="Ex.: Mesa dos familiares">
+        </label>
+      </div>
+      <div class="inline-actions">
+        <button class="btn" id="addTableBtn" type="button">+ Adicionar mesa</button>
+        <button class="ghost" id="saveTablesBtn" type="button">Guardar organização</button>
+      </div>
+
+      <div class="notice" style="margin-top:14px">
+        A lista de pessoas é obtida das confirmações com presença confirmada.
+        Se um convidado tiver acompanhantes, cada acompanhante também poderá
+        receber uma mesa.
+      </div>
+      <div id="tableManager" style="margin-top:14px">
+        <p class="empty">A carregar organização das mesas…</p>
+      </div>
+    </section>
+
     <section class="tab" id="tab-account">
       <h2 class="screen-title">Conta do editor</h2>
       <p class="screen-desc">Sessão administrativa.</p>
@@ -1018,6 +1086,9 @@ label{
   <button class="nav-item" data-tab="guests">
     <span class="ico">♧</span>Convidados
   </button>
+  <button class="nav-item" data-tab="tables">
+    <span class="ico">▦</span>Mesas
+  </button>
   <button class="nav-item" data-tab="account">
     <span class="ico">⚙</span>Conta
   </button>
@@ -1073,6 +1144,7 @@ const EDITOR_EMAIL = "reginaldomuanza83@gmail.com";
 
 const eventRef = ref(db, `publicEvents/${EVENT_ID}`);
 const rsvpsRef = ref(db, `rsvps/${EVENT_ID}`);
+const tablePlanRef = ref(db, `publicEvents/${EVENT_ID}/tablePlan`);
 
 const $ = id => document.getElementById(id);
 
@@ -1097,6 +1169,7 @@ let eventData  = { ...defaults };
 let currentUser = null;
 let rsvpItems   = [];
 let saving      = false;
+let tablePlan   = { tables: [] };
 
 function toast(message){
   $("toast").textContent = message;
@@ -1195,6 +1268,7 @@ function setTab(name){
     invite:["Convite","Edite os textos principais do convite."],
     details:["Detalhes","Data, horário, local e orientações."],
     guests:["Convidados","Consulte as confirmações de presença."],
+    tables:["Organização das mesas","Crie mesas e atribua os convidados."],
     account:["Conta","Definições da conta do editor."]
   };
 
@@ -1319,6 +1393,131 @@ function escapeHTML(value){
   }[ch]));
 }
 
+
+function normalizePersonName(value){
+  return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .toLowerCase().trim().replace(/\s+/g," ");
+}
+
+function attendingPeople(){
+  const people = [];
+  rsvpItems.forEach(item => {
+    const answer = String(item.attendance || item.status || "").toLowerCase();
+    if (!["sim","confirmed","yes","vou aparecer"].includes(answer)) return;
+    const mainName = String(item.name || item.guestName || "").trim();
+    if (mainName) people.push(mainName);
+    (Array.isArray(item.companionDetails) ? item.companionDetails : []).forEach(c => {
+      const n = String(c?.name || "").trim();
+      if (n) people.push(n);
+    });
+  });
+  const seen = new Set();
+  return people.filter(name => {
+    const key = normalizePersonName(name);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).sort((a,b) => a.localeCompare(b,"pt"));
+}
+
+function renderTableManager(){
+  const host = $("tableManager");
+  if (!host) return;
+  const tables = Array.isArray(tablePlan.tables) ? tablePlan.tables : [];
+  const people = attendingPeople();
+
+  if (!tables.length){
+    host.innerHTML = '<p class="empty">Ainda não criou nenhuma mesa. Adicione a primeira mesa acima.</p>';
+  } else {
+    host.innerHTML = tables.map((table, index) => {
+      const members = Array.isArray(table.guests) ? table.guests : [];
+      return `
+        <div class="table-admin-card">
+          <div class="table-head-actions">
+            <h3>${escapeHTML(table.name || `Mesa ${index+1}`)}</h3>
+            <button class="detail-button" type="button" data-remove-table="${escapeHTML(table.id)}">Eliminar</button>
+          </div>
+          <small style="color:var(--muted)">${members.length} pessoa(s) atribuída(s)</small>
+        </div>
+      `;
+    }).join("");
+  }
+
+  if (!people.length){
+    host.innerHTML += '<p class="empty">Ainda não há convidados com presença confirmada.</p>';
+    return;
+  }
+
+  const assignments = new Map();
+  tables.forEach(t => (t.guests || []).forEach(name => assignments.set(normalizePersonName(name), t.id)));
+
+  host.innerHTML += `
+    <h3 class="screen-title" style="font-size:24px;margin-top:22px">Atribuir convidados</h3>
+    ${people.map(name => {
+      const selected = assignments.get(normalizePersonName(name)) || "";
+      return `
+        <div class="table-person-row">
+          <strong>${escapeHTML(name)}</strong>
+          <select data-person-table="${escapeHTML(name)}" aria-label="Mesa de ${escapeHTML(name)}">
+            <option value="">Sem mesa atribuída</option>
+            ${tables.map(t => `<option value="${escapeHTML(t.id)}" ${selected === t.id ? "selected" : ""}>${escapeHTML(t.name)}</option>`).join("")}
+          </select>
+        </div>
+      `;
+    }).join("")}
+  `;
+}
+
+function addTable(){
+  const input = $("newTableName");
+  const name = input.value.trim();
+  if (!name){ toast("Introduza o nome da mesa."); input.focus(); return; }
+  if (!Array.isArray(tablePlan.tables)) tablePlan.tables = [];
+  if (tablePlan.tables.some(t => normalizePersonName(t.name) === normalizePersonName(name))){
+    toast("Já existe uma mesa com esse nome."); return;
+  }
+  tablePlan.tables.push({ id: `table_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, name, guests: [] });
+  input.value = "";
+  renderTableManager();
+  // Guarda automaticamente assim que uma mesa é criada.
+  saveTablePlan();
+}
+
+async function saveTablePlan(){
+  if (!currentUser || currentUser.email?.toLowerCase() !== EDITOR_EMAIL){
+    toast("Inicie sessão com a conta autorizada para guardar."); return;
+  }
+  const tables = (tablePlan.tables || []).map(t => ({...t, guests: []}));
+  document.querySelectorAll("[data-person-table]").forEach(select => {
+    const table = tables.find(t => t.id === select.value);
+    if (table) table.guests.push(select.dataset.personTable);
+  });
+  tablePlan = { tables, updatedAt: Date.now() };
+  try{
+    await set(tablePlanRef, tablePlan);
+    renderTableManager();
+    toast("Organização das mesas guardada e publicada no convite.");
+  }catch(error){
+    console.error("Erro ao guardar mesas:", error);
+    const code = error?.code ? ` (${error.code})` : "";
+    toast(`Não foi possível guardar as mesas${code}. Verifique a ligação e as regras do Firebase.`);
+  }
+}
+
+function listenTablePlan(){
+  onValue(tablePlanRef, snapshot => {
+    const value = snapshot.val() || {};
+    tablePlan = {
+      tables: Array.isArray(value.tables) ? value.tables : [],
+      updatedAt: value.updatedAt || null
+    };
+    renderTableManager();
+  }, error => {
+    console.error("Erro ao carregar mesas:", error);
+    $("tableManager").innerHTML = '<p class="empty">Não foi possível carregar as mesas.</p>';
+  });
+}
+
 function listenRSVPs(){
   onValue(rsvpsRef, snapshot => {
     const raw = snapshot.val() || {};
@@ -1360,6 +1559,7 @@ function renderRSVPs(){
   $("guestTotal2").textContent = rsvpItems.length;
   $("guestYes2").textContent   = yes;
   $("guestNo2").textContent    = no;
+  renderTableManager();
 
   if (!rsvpItems.length){
     $("rsvpList").innerHTML =
@@ -1518,6 +1718,27 @@ $("logoutBtn").addEventListener("click", logout);
 
 $("saveInviteBtn").addEventListener("click",  saveAll);
 $("saveDetailsBtn").addEventListener("click", saveAll);
+$("addTableBtn").addEventListener("click", addTable);
+$("saveTablesBtn").addEventListener("click", saveTablePlan);
+$("newTableName").addEventListener("keydown", event => {
+  if (event.key === "Enter"){ event.preventDefault(); addTable(); }
+});
+$("tableManager").addEventListener("click", event => {
+  const button = event.target.closest("[data-remove-table]");
+  if (!button) return;
+  const id = button.dataset.removeTable;
+  tablePlan.tables = (tablePlan.tables || []).filter(t => t.id !== id);
+  renderTableManager();
+  // Guarda automaticamente a eliminação da mesa.
+  saveTablePlan();
+});
+
+$("tableManager").addEventListener("change", event => {
+  if (event.target.matches("[data-person-table]")) {
+    // Guarda automaticamente cada atribuição ou remoção de convidado.
+    saveTablePlan();
+  }
+});
 
 $("previewBtn").addEventListener("click", previewPublic);
 $("shareBtn").addEventListener("click",  shareLink);
@@ -1562,6 +1783,7 @@ onAuthStateChanged(auth, async user => {
   try{
     await loadEvent();
     listenRSVPs();
+    listenTablePlan();
     setTab("home");
 
   } catch(error){
