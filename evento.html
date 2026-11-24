@@ -75,7 +75,7 @@ body{
 }
 
 .names{
-  font-family:times;
+  font-family:'Times New Roman',Times,serif;
   font-size:clamp(65px,13vw,100px);
   line-height:.95;
   margin:20px 0;
@@ -198,8 +198,8 @@ body{
   position:absolute;
   z-index:1;
   font-size:95px;
-  color:#d18b72;
-  text-shadow:1px 3px 5px #a45e4b55;
+  color:#72243a; /* Vinho */
+  text-shadow:1px 3px 5px #5b1b2b66;
   pointer-events:none;
 }
 
@@ -224,6 +224,50 @@ body{
   bottom:-20px;
   right:-15px;
   transform:rotate(25deg);
+}
+
+/* Flores adicionais para preencher as laterais e a moldura do convite */
+.flower.extra{font-size:62px;opacity:.78}
+.flower.extra.small{font-size:43px;opacity:.68}
+.flower.extra.top-a{top:9%;left:2%;transform:rotate(-18deg)}
+.flower.extra.top-b{top:10%;right:2%;transform:rotate(22deg)}
+.flower.extra.left-a{top:34%;left:-12px;transform:rotate(18deg)}
+.flower.extra.right-a{top:34%;right:-12px;transform:rotate(-18deg)}
+.flower.extra.left-b{top:57%;left:-13px;transform:rotate(-22deg)}
+.flower.extra.right-b{top:57%;right:-13px;transform:rotate(22deg)}
+.flower.extra.bottom-a{bottom:9%;left:2%;transform:rotate(18deg)}
+.flower.extra.bottom-b{bottom:9%;right:2%;transform:rotate(-18deg)}
+.flower.extra.small.top-mid{top:2%;left:24%;transform:rotate(12deg)}
+.flower.extra.small.top-mid2{top:3%;right:24%;transform:rotate(-12deg)}
+.flower.extra.small.left-mid{top:45%;left:1%;transform:rotate(30deg)}
+.flower.extra.small.right-mid{top:45%;right:1%;transform:rotate(-30deg)}
+.flower.extra.small.bottom-mid{bottom:2%;left:25%;transform:rotate(-10deg)}
+.flower.extra.small.bottom-mid2{bottom:2%;right:25%;transform:rotate(10deg)}
+
+/* Flores extras: preenchimento mais abundante da moldura */
+.flower.extra.more{font-size:50px;opacity:.72}
+.flower.extra.more.t1{top:19%;left:8%;transform:rotate(-15deg)}
+.flower.extra.more.t2{top:19%;right:8%;transform:rotate(15deg)}
+.flower.extra.more.m1{top:25%;left:-8px;transform:rotate(25deg)}
+.flower.extra.more.m2{top:25%;right:-8px;transform:rotate(-25deg)}
+.flower.extra.more.m3{top:49%;left:8%;transform:rotate(12deg)}
+.flower.extra.more.m4{top:49%;right:8%;transform:rotate(-12deg)}
+.flower.extra.more.b1{bottom:24%;left:-8px;transform:rotate(-18deg)}
+.flower.extra.more.b2{bottom:24%;right:-8px;transform:rotate(18deg)}
+.flower.extra.more.b3{bottom:18%;left:12%;transform:rotate(22deg)}
+.flower.extra.more.b4{bottom:18%;right:12%;transform:rotate(-22deg)}
+
+/* Alternância das flores entre vinho e laranja */
+.flower.two,
+.flower.four,
+.flower.extra.top-b,
+.flower.extra.right-a,
+.flower.extra.bottom-a,
+.flower.extra.small.top-mid2,
+.flower.extra.small.right-mid,
+.flower.extra.small.bottom-mid{
+  color:#e8782f; /* Laranja */
+  text-shadow:1px 3px 5px #a94c1c66;
 }
 
 .pearls{
@@ -578,6 +622,33 @@ body{
 <div class="flower two">✿</div>
 <div class="flower three">✿</div>
 <div class="flower four">✿</div>
+
+<!-- Flores adicionais distribuídas pela moldura do convite -->
+<div class="flower extra top-a">❀</div>
+<div class="flower extra top-b">❀</div>
+<div class="flower extra left-a">✿</div>
+<div class="flower extra right-a">✿</div>
+<div class="flower extra left-b">❀</div>
+<div class="flower extra right-b">❀</div>
+<div class="flower extra bottom-a">✿</div>
+<div class="flower extra bottom-b">✿</div>
+<div class="flower extra small top-mid">✿</div>
+<div class="flower extra small top-mid2">✿</div>
+<div class="flower extra small left-mid">❀</div>
+<div class="flower extra small right-mid">❀</div>
+<div class="flower extra small bottom-mid">✿</div>
+<div class="flower extra small bottom-mid2">✿</div>
+
+<div class="flower extra more t1">❀</div>
+<div class="flower extra more t2">✿</div>
+<div class="flower extra more m1">✿</div>
+<div class="flower extra more m2">❀</div>
+<div class="flower extra more m3">❀</div>
+<div class="flower extra more m4">✿</div>
+<div class="flower extra more b1">❀</div>
+<div class="flower extra more b2">✿</div>
+<div class="flower extra more b3">✿</div>
+<div class="flower extra more b4">❀</div>
 
 <div class="pearls">
 <i class="pearl p1"></i>
