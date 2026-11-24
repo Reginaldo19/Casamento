@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#d18b72">
+<title>Convite de Casamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;padding:12px 6px;min-height:100vh;
+ display:flex;justify-content:center;align-items:center;
+ background:linear-gradient(135deg,#f4d1bf,#b86e5b,#f6d7c7);
+ color:#211714;font-family:'Playfair Display',serif
+}
+.invitation{
+ width:100%;max-width:570px;padding:12px;
+ background:linear-gradient(135deg,#f4c6ad,#fff2e8,#d99b80);
+ box-shadow:0 15px 50px #542b2580;position:relative;overflow:hidden
+}
+.paper{
+ min-height:900px;padding:55px 18px 30px;text-align:center;
+ border:2px solid #c98870;position:relative;
+ background:radial-gradient(ellipse at center,#fffaf5,#f8e9df 80%);
+ box-shadow:inset 0 0 0 7px #e8b69f55;overflow:hidden
+}
+.paper:before{content:"";position:absolute;inset:12px;border:1px solid #d9a58e;pointer-events:none}
+.paper:after{content:"";position:absolute;inset:20px;border:1px solid #edcaba;pointer-events:none}
+.content{position:relative;z-index:2}
+.verse{font-size:14px;line-height:1.5;max-width:410px;margin:15px auto 25px}
+.names{font-family:'Great Vibes',cursive;font-size:clamp(65px,13vw,100px);line-height:.95;margin:20px 0;font-weight:400;color:#100b09}
+.amp{display:block;color:#cb917c;font-size:45px;line-height:.8}
+.subtitle{font-size:18px;margin:25px auto;max-width:440px}
+.time{display:flex;align-items:center;gap:15px;margin-top:35px;font-size:17px}
+.time:before,.time:after{content:"";height:1px;background:#33221d;flex:1}
+.date{font-family:Arial,sans-serif;font-size:clamp(25px,6vw,42px);font-weight:bold;letter-spacing:-1.5px;margin:12px 0;white-space:nowrap}
+.heart{color:#c98570}
+.line{width:85%;height:1px;background:#54372d;margin:20px auto 50px}
+.instruction{font-size:25px;margin-bottom:20px}
+.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-width:430px;margin:auto}
+.item{border:0;background:none;color:#241714;font-family:inherit;cursor:pointer}
+.circle{width:78px;height:78px;max-width:19vw;max-height:19vw;border-radius:50%;background:#cd9079;display:grid;place-items:center;margin:auto auto 8px;transition:.2s}
+.item:hover .circle{transform:translateY(-5px);background:#e5ad96}
+.circle svg{width:47px;height:47px;stroke:#1d110d;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.item span:last-child{display:block;font-size:15px;line-height:1.1}
+.closing{font-size:29px;margin:50px 0 10px}
+.flower{position:absolute;z-index:1;font-size:95px;color:#d18b72;text-shadow:1px 3px 5px #a45e4b55;pointer-events:none}
+.one{top:-12px;left:-15px}.two{top:-12px;right:-15px;transform:rotate(35deg)}
+.three{bottom:-20px;left:-15px;transform:rotate(-25deg)}
+.four{bottom:-20px;right:-15px;transform:rotate(25deg)}
+.pearls{position:absolute;inset:0;pointer-events:none;z-index:1}
+.pearl{position:absolute;width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 30% 25%,white,#f5d9c2 45%,#bd866f);box-shadow:0 2px 5px #92574466}
+.p1{top:4%;left:48%;width:18px;height:18px}.p2{top:8%;left:58%}
+.p3{top:15%;right:4%;width:18px;height:18px}.p4{top:29%;left:3%}
+.p5{top:45%;right:3%}.p6{bottom:28%;left:4%;width:17px;height:17px}
+.p7{bottom:15%;right:6%}.p8{bottom:5%;left:45%;width:19px;height:19px}
+.overlay{position:fixed;inset:0;z-index:10;background:#160c0bdd;display:none;justify-content:center;align-items:center;padding:18px}
+.overlay.active{display:flex}
+.modal{width:100%;max-width:420px;background:#fff6ee;border:2px solid #d39a80;border-radius:18px;padding:28px 23px;position:relative;max-height:85vh;overflow:auto;box-shadow:0 15px 50px #0006}
+.modal h2{font:40px 'Great Vibes',cursive;color:#a85f4b;margin:0 30px 15px 0}
+.modal p{font-size:15px;line-height:1.7;margin:9px 0}
+.close{position:absolute;right:13px;top:7px;background:none;border:0;font-size:30px;color:#8e5545;cursor:pointer}
+.modal input{width:100%;padding:13px;border:1px solid #d6a18b;border-radius:9px;font-size:16px;margin:10px 0;background:white}
+.submit{background:#ae6853;color:white;padding:13px 20px;border:0;border-radius:30px;font-weight:bold;cursor:pointer;width:100%;margin-top:8px}
+.secondary{background:#765b52}.rsvp-options{display:grid;gap:10px;margin:18px 0}.rsvp-form label{display:block;font-size:14px;margin-top:12px;text-align:left}.rsvp-form input,.rsvp-form textarea{display:block}.companion-row{border:1px solid #e2b9a7;border-radius:10px;padding:10px;margin:10px 0}.form-note{font-size:12px;color:#765b52}
+.feedback{font-size:13px;color:#58815d;margin-top:12px}
+.loading{padding:30px;text-align:center}
+@media(max-width:430px){
+ .paper{min-height:800px;padding:48px 10px 25px}
+ .verse{font-size:12px}.subtitle{font-size:15px}
+ .instruction{font-size:21px}
+ .circle{width:65px;height:65px}
+ .circle svg{width:39px;height:39px}
+ .item span:last-child{font-size:12px}
+ .closing{font-size:25px}
+ .line{margin-bottom:40px}
+}
+</style>
+</head>
+
+<body>
+
+<main class="invitation">
+<div class="paper">
+
+<div class="flower one">✿</div>
+<div class="flower two">✿</div>
+<div class="flower three">✿</div>
+<div class="flower four">✿</div>
+
+<div class="pearls">
+<i class="pearl p1"></i><i class="pearl p2"></i>
+<i class="pearl p3"></i><i class="pearl p4"></i>
+<i class="pearl p5"></i><i class="pearl p6"></i>
+<i class="pearl p7"></i><i class="pearl p8"></i>
+</div>
+
+<div class="content" id="invitationContent">
+<div class="loading">A preparar o convite...</div>
+</div>
+
+</div>
+</main>
+
+<div class="overlay" id="overlay">
+<div class="modal">
+<button class="close" onclick="closePanel()">×</button>
+<h2 id="modalTitle">Detalhes</h2>
+<div id="modalContent"></div>
+</div>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {getDatabase,ref,get,push,set} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyDTRZaE58HzRK7NC0PYNn1IipGSLL1P85g",
+ authDomain:"fastinvite-81583.firebaseapp.com",
+ databaseURL:"https://fastinvite-81583-default-rtdb.firebaseio.com",
+ projectId:"fastinvite-81583",
+ storageBucket:"fastinvite-81583.firebasestorage.app",
+ messagingSenderId:"131769265404",
+ appId:"1:131769265404:web:a259a707445301c0ec3b79"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+const params=new URLSearchParams(location.search);
+const EVENT_ID=params.get("id") || "cristiano-avelina";
+
+let data={};
+
+const $=id=>document.getElementById(id);
+
+function safe(value){
+ return String(value??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
+}
+
+function formatDate(value){
+ if(!value)return "";
+ const [year,month,day]=value.split("-");
+ const months=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+ return `${Number(day)} ${months[Number(month)-1]} ${year}`;
+}
+
+function render(){
+ $("invitationContent").innerHTML=`
+ <p class="verse">
+ “${safe(data.verse)}”
+ <br><strong>${safe(data.verseRef)}</strong>
+ </p>
+
+ <h1 class="names">
+ ${safe(data.groom)}
+ <span class="amp">&</span>
+ ${safe(data.bride)}
+ </h1>
+
+ <p class="subtitle">${safe(data.subtitle)}</p>
+
+ <div class="time">
+ ${safe(data.time)} · ${safe(data.date ? new Date(data.date+"T12:00:00").toLocaleDateString("pt-PT",{weekday:"long"}) : "")}
+ </div>
+
+ <div class="date">
+ ${safe(formatDate(data.date))}
+ </div>
+
+ <div class="line"></div>
+
+ <p class="instruction">Clique nos ícones para acessar!</p>
+
+ <div class="buttons">
+
+ <button class="item" onclick="openPanel('rsvp')">
+ <div class="circle">
+ <svg viewBox="0 0 48 48"><path d="M7 24l11 11L42 8"/><path d="M39 24a17 17 0 1 1-8-14"/></svg>
+ </div>
+ <span>Confirmar<br>presença</span>
+ </button>
+
+ <button class="item" onclick="openPanel('location')">
+ <div class="circle">
+ <svg viewBox="0 0 48 48"><path d="M24 44s16-15 16-27a16 16 0 0 0-32 0c0 12 16 27 16 27z"/><circle cx="24" cy="17" r="6"/></svg>
+ </div>
+ <span>Local do<br>evento</span>
+ </button>
+
+ <button class="item" onclick="openPanel('guide')">
+ <div class="circle">
+ <svg viewBox="0 0 48 48"><path d="M4 9c8-3 14-1 20 4v29C18 36 11 35 4 38z"/><path d="M44 9c-8-3-14-1-20 4v29c6-6 13-7 20-4z"/><path d="M24 13v29"/></svg>
+ </div>
+ <span>Manual do<br>convidado</span>
+ </button>
+
+ <button class="item" onclick="openPanel('dress')">
+ <div class="circle">
+ <svg viewBox="0 0 48 48"><path d="M8 17l16-12 16 12-5 7-11-5-11 5z"/><path d="M24 19v17"/><path d="M10 36h28v5H10z"/></svg>
+ </div>
+ <span>Dress<br>code</span>
+ </button>
+
+ </div>
+
+ <p class="closing">${safe(data.closing)}</p>
+ `;
+}
+
+window.openPanel=function(type){
+ $("overlay").classList.add("active");
+ let title="",html="";
+
+ if(type==="rsvp"){
+  title="Confirmar presença";
+  html=`
+  <p>Será uma alegria contar consigo neste dia especial!</p>
+  <div class="rsvp-options">
+   <button type="button" class="submit" id="yesChoice">Vou aparecer</button>
+   <button type="button" class="submit secondary" id="noChoice">Não vou poder ir</button>
+  </div>
+  <div id="rsvpFormArea"></div>`;
+ }
+
+ if(type==="location"){
+  title="Local do evento";
+  html=`
+  <p><strong>${safe(data.placeName || "Local do evento")}</strong></p>
+  <p>${safe(data.address || "Endereço a indicar.")}</p>
+  <p>${safe(data.locationNote)}</p>`;
+ }
+
+ if(type==="guide"){
+  title="Manual do convidado";
+  html=`<p>${safe(data.guide || "Seja bem-vindo à nossa celebração!")}</p>`;
+ }
+
+ if(type==="dress"){
+  title="Dress code";
+  html=`
+  <p><strong>${safe(data.dressTitle || "Formal / Elegante")}</strong></p>
+  <p>${safe(data.dressDescription)}</p>`;
+ }
+
+ $("modalTitle").textContent=title;
+ $("modalContent").innerHTML=html;
+
+ if(type==="rsvp"){
+  const area=$("rsvpFormArea");
+  const openForm=(attendance)=>{
+   if(attendance==="yes"){
+    area.innerHTML=`<form id="attendanceForm" class="rsvp-form">
+     <label>Nome completo<input id="guestName" maxlength="100" required placeholder="Nome completo"></label>
+     <label>Total de acompanhantes<input id="companionCount" type="number" min="0" max="20" value="0" required></label>
+     <div id="companionsFields"></div>
+     <button class="submit" type="submit">Enviar confirmação</button>
+     <div class="feedback" id="feedback"></div>
+    </form>`;
+    const count=$("companionCount"), companions=$("companionsFields");
+    const draw=()=>{
+     const n=Math.max(0,Math.min(20,Number(count.value)||0));
+     companions.innerHTML=Array.from({length:n},(_,i)=>`<div class="companion-row"><strong>Acompanhante ${i+1}</strong><label>Nome completo<input class="companion-name" maxlength="100" required placeholder="Nome completo do acompanhante"></label><label>Idade<input class="companion-age" type="number" min="0" max="120" required placeholder="Idade"></label></div>`).join("");
+    };
+    count.addEventListener("input",draw);draw();
+   }else{
+    area.innerHTML=`<form id="attendanceForm" class="rsvp-form">
+     <label>Nome completo<input id="guestName" maxlength="100" required placeholder="Nome completo"></label>
+     <label>Motivo da ausência<textarea id="absenceReason" maxlength="500" rows="4" required placeholder="Indique o motivo"></textarea></label>
+     <button class="submit" type="submit">Enviar resposta</button>
+     <div class="feedback" id="feedback"></div>
+    </form>`;
+   }
+   $("attendanceForm").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const button=e.submitter, feedback=$("feedback"), name=$("guestName").value.trim();
+    if(!name)return;
+    let record={name,attendance:attendance==="yes"?"Vou aparecer":"Não vou poder ir",date:new Date().toISOString()};
+    if(attendance==="yes"){
+     const names=[...document.querySelectorAll(".companion-name")].map(x=>x.value.trim());
+     const ages=[...document.querySelectorAll(".companion-age")].map(x=>Number(x.value));
+     if(names.some(x=>!x)||ages.some(x=>!Number.isFinite(x)||x<0))return;
+     record.companions=names.length;
+     record.companionDetails=names.map((companionName,i)=>({name:companionName,age:ages[i]}));
+    }else record.reason=$("absenceReason").value.trim();
+    button.disabled=true;button.textContent="A enviar…";
+    try{
+     const newRef=push(ref(db,"rsvps/"+EVENT_ID));
+     await set(newRef,record);
+     feedback.textContent="Resposta guardada! A abrir o WhatsApp…";
+     const phone=String(data.whatsapp||"").replace(/\D/g,"");
+     if(phone){
+      const companionsText=(record.companionDetails||[]).map((c,i)=>`\n   ${i+1}. ${c.name} — ${c.age} anos`).join("");
+      const message=attendance==="yes"
+       ? `Confirmação de presença — ${data.hosts||data.groom+" & "+data.bride}\nNome: ${name}\nTotal de acompanhantes: ${record.companions}${companionsText}`
+       : `Resposta ao convite — ${data.hosts||data.groom+" & "+data.bride}\nNome: ${name}\nNão poderá comparecer.\nMotivo: ${record.reason}`;
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`,"_blank","noopener");
+     }else feedback.textContent="Resposta guardada, mas o WhatsApp do casal ainda não foi configurado no painel index.html.";
+    }catch(error){
+     console.error(error);feedback.textContent="Não foi possível enviar. Tente novamente.";
+     button.disabled=false;button.textContent="Tentar novamente";
+    }
+   });
+  };
+  $("yesChoice").addEventListener("click",()=>openForm("yes"));
+  $("noChoice").addEventListener("click",()=>openForm("no"));
+ }
+};
+
+window.closePanel=function(){
+ $("overlay").classList.remove("active");
+};
+
+$("overlay").addEventListener("click",e=>{
+ if(e.target===$("overlay"))closePanel();
+});
+
+document.addEventListener("keydown",e=>{
+ if(e.key==="Escape")closePanel();
+});
+
+async function init(){
+ try{
+  const snapshot=await get(ref(db,"publicEvents/"+EVENT_ID));
+  if(!snapshot.exists()){
+   $("invitationContent").innerHTML="Este convite não foi encontrado.";
+   return;
+  }
+
+  data=snapshot.val();
+  // Compatibilidade entre os nomes dos campos do painel e do convite.
+  data.groom=data.groom || (data.hosts||"").split("&")[0]?.trim() || "";
+  data.bride=data.bride || (data.hosts||"").split("&")[1]?.trim() || "";
+  data.verse=data.verse || data.quote || "";
+  data.verseRef=data.verseRef || data.quoteRef || "";
+  data.subtitle=data.subtitle || data.message || "";
+  data.placeName=data.placeName || data.venue || "";
+  render();
+
+ }catch(error){
+  console.error(error);
+  $("invitationContent").innerHTML="Não foi possível carregar o convite. Verifique a ligação à internet.";
+ }
+}
+
+init();
+</script>
+</body>
+</html>
