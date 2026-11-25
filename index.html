@@ -496,45 +496,6 @@ label{
   color:var(--c-8a4b33);
   font-size:10px;
 }
-.table-admin-card{
-  background:#fff;
-  border:1px solid var(--c-f0d9ce);
-  border-radius:13px;
-  padding:13px;
-  margin:10px 0;
-}
-.table-admin-card h3{
-  margin:0 0 9px;
-  color:var(--c-8a4b33);
-  font:600 21px 'Cormorant Garamond',serif;
-}
-.table-person-row{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(125px, .8fr);
-  gap:10px;
-  align-items:center;
-  border-top:1px solid var(--c-f0dfd7);
-  padding:9px 0;
-  font-size:11px;
-}
-.table-person-row select{
-  width:100%;
-  border:1px solid var(--c-e6cabb);
-  border-radius:8px;
-  background:#fff;
-  padding:9px;
-  color:var(--c-382923);
-  font:inherit;
-}
-.table-head-actions{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  justify-content:space-between;
-}
-@media(max-width:480px){
-  .table-person-row{grid-template-columns:1fr;gap:5px}
-}
 
 .inline-actions{
   display:flex;
@@ -960,6 +921,12 @@ label{
         Consulte as respostas enviadas pelos convidados na página pública.
       </p>
 
+      <div class="inline-actions" style="margin:16px 0">
+        <button class="btn" id="exportGuestsPdfBtn" type="button">
+          Exportar convidados em PDF
+        </button>
+      </div>
+
       <div class="stat-grid">
         <div class="stat">
           <b id="guestTotal2">0</b>
@@ -977,35 +944,6 @@ label{
 
       <div id="rsvpList">
         <p class="empty">A carregar confirmações…</p>
-      </div>
-    </section>
-
-    <section class="tab" id="tab-tables">
-      <h2 class="screen-title">Organização das mesas</h2>
-      <p class="screen-desc">
-        Crie as mesas com o nome que desejar e atribua cada convidado confirmado
-        (incluindo acompanhantes) à respetiva mesa. As alterações serão publicadas
-        no convite para consulta dos convidados.
-      </p>
-
-      <div class="formgrid">
-        <label class="span2">Nome da mesa
-          <input class="field" id="newTableName" maxlength="60"
-                 placeholder="Ex.: Mesa dos familiares">
-        </label>
-      </div>
-      <div class="inline-actions">
-        <button class="btn" id="addTableBtn" type="button">+ Adicionar mesa</button>
-        <button class="ghost" id="saveTablesBtn" type="button">Guardar organização</button>
-      </div>
-
-      <div class="notice" style="margin-top:14px">
-        A lista de pessoas é obtida das confirmações com presença confirmada.
-        Se um convidado tiver acompanhantes, cada acompanhante também poderá
-        receber uma mesa.
-      </div>
-      <div id="tableManager" style="margin-top:14px">
-        <p class="empty">A carregar organização das mesas…</p>
       </div>
     </section>
 
@@ -1086,9 +1024,6 @@ label{
   <button class="nav-item" data-tab="guests">
     <span class="ico">♧</span>Convidados
   </button>
-  <button class="nav-item" data-tab="tables">
-    <span class="ico">▦</span>Mesas
-  </button>
   <button class="nav-item" data-tab="account">
     <span class="ico">⚙</span>Conta
   </button>
@@ -1144,7 +1079,6 @@ const EDITOR_EMAIL = "reginaldomuanza83@gmail.com";
 
 const eventRef = ref(db, `publicEvents/${EVENT_ID}`);
 const rsvpsRef = ref(db, `rsvps/${EVENT_ID}`);
-const tablePlanRef = ref(db, `publicEvents/${EVENT_ID}/tablePlan`);
 
 const $ = id => document.getElementById(id);
 
@@ -1169,7 +1103,6 @@ let eventData  = { ...defaults };
 let currentUser = null;
 let rsvpItems   = [];
 let saving      = false;
-let tablePlan   = { tables: [] };
 
 function toast(message){
   $("toast").textContent = message;
@@ -1268,7 +1201,6 @@ function setTab(name){
     invite:["Convite","Edite os textos principais do convite."],
     details:["Detalhes","Data, horário, local e orientações."],
     guests:["Convidados","Consulte as confirmações de presença."],
-    tables:["Organização das mesas","Crie mesas e atribua os convidados."],
     account:["Conta","Definições da conta do editor."]
   };
 
@@ -1393,131 +1325,6 @@ function escapeHTML(value){
   }[ch]));
 }
 
-
-function normalizePersonName(value){
-  return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    .toLowerCase().trim().replace(/\s+/g," ");
-}
-
-function attendingPeople(){
-  const people = [];
-  rsvpItems.forEach(item => {
-    const answer = String(item.attendance || item.status || "").toLowerCase();
-    if (!["sim","confirmed","yes","vou aparecer"].includes(answer)) return;
-    const mainName = String(item.name || item.guestName || "").trim();
-    if (mainName) people.push(mainName);
-    (Array.isArray(item.companionDetails) ? item.companionDetails : []).forEach(c => {
-      const n = String(c?.name || "").trim();
-      if (n) people.push(n);
-    });
-  });
-  const seen = new Set();
-  return people.filter(name => {
-    const key = normalizePersonName(name);
-    if (!key || seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  }).sort((a,b) => a.localeCompare(b,"pt"));
-}
-
-function renderTableManager(){
-  const host = $("tableManager");
-  if (!host) return;
-  const tables = Array.isArray(tablePlan.tables) ? tablePlan.tables : [];
-  const people = attendingPeople();
-
-  if (!tables.length){
-    host.innerHTML = '<p class="empty">Ainda não criou nenhuma mesa. Adicione a primeira mesa acima.</p>';
-  } else {
-    host.innerHTML = tables.map((table, index) => {
-      const members = Array.isArray(table.guests) ? table.guests : [];
-      return `
-        <div class="table-admin-card">
-          <div class="table-head-actions">
-            <h3>${escapeHTML(table.name || `Mesa ${index+1}`)}</h3>
-            <button class="detail-button" type="button" data-remove-table="${escapeHTML(table.id)}">Eliminar</button>
-          </div>
-          <small style="color:var(--muted)">${members.length} pessoa(s) atribuída(s)</small>
-        </div>
-      `;
-    }).join("");
-  }
-
-  if (!people.length){
-    host.innerHTML += '<p class="empty">Ainda não há convidados com presença confirmada.</p>';
-    return;
-  }
-
-  const assignments = new Map();
-  tables.forEach(t => (t.guests || []).forEach(name => assignments.set(normalizePersonName(name), t.id)));
-
-  host.innerHTML += `
-    <h3 class="screen-title" style="font-size:24px;margin-top:22px">Atribuir convidados</h3>
-    ${people.map(name => {
-      const selected = assignments.get(normalizePersonName(name)) || "";
-      return `
-        <div class="table-person-row">
-          <strong>${escapeHTML(name)}</strong>
-          <select data-person-table="${escapeHTML(name)}" aria-label="Mesa de ${escapeHTML(name)}">
-            <option value="">Sem mesa atribuída</option>
-            ${tables.map(t => `<option value="${escapeHTML(t.id)}" ${selected === t.id ? "selected" : ""}>${escapeHTML(t.name)}</option>`).join("")}
-          </select>
-        </div>
-      `;
-    }).join("")}
-  `;
-}
-
-function addTable(){
-  const input = $("newTableName");
-  const name = input.value.trim();
-  if (!name){ toast("Introduza o nome da mesa."); input.focus(); return; }
-  if (!Array.isArray(tablePlan.tables)) tablePlan.tables = [];
-  if (tablePlan.tables.some(t => normalizePersonName(t.name) === normalizePersonName(name))){
-    toast("Já existe uma mesa com esse nome."); return;
-  }
-  tablePlan.tables.push({ id: `table_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, name, guests: [] });
-  input.value = "";
-  renderTableManager();
-  // Guarda automaticamente assim que uma mesa é criada.
-  saveTablePlan();
-}
-
-async function saveTablePlan(){
-  if (!currentUser || currentUser.email?.toLowerCase() !== EDITOR_EMAIL){
-    toast("Inicie sessão com a conta autorizada para guardar."); return;
-  }
-  const tables = (tablePlan.tables || []).map(t => ({...t, guests: []}));
-  document.querySelectorAll("[data-person-table]").forEach(select => {
-    const table = tables.find(t => t.id === select.value);
-    if (table) table.guests.push(select.dataset.personTable);
-  });
-  tablePlan = { tables, updatedAt: Date.now() };
-  try{
-    await set(tablePlanRef, tablePlan);
-    renderTableManager();
-    toast("Organização das mesas guardada e publicada no convite.");
-  }catch(error){
-    console.error("Erro ao guardar mesas:", error);
-    const code = error?.code ? ` (${error.code})` : "";
-    toast(`Não foi possível guardar as mesas${code}. Verifique a ligação e as regras do Firebase.`);
-  }
-}
-
-function listenTablePlan(){
-  onValue(tablePlanRef, snapshot => {
-    const value = snapshot.val() || {};
-    tablePlan = {
-      tables: Array.isArray(value.tables) ? value.tables : [],
-      updatedAt: value.updatedAt || null
-    };
-    renderTableManager();
-  }, error => {
-    console.error("Erro ao carregar mesas:", error);
-    $("tableManager").innerHTML = '<p class="empty">Não foi possível carregar as mesas.</p>';
-  });
-}
-
 function listenRSVPs(){
   onValue(rsvpsRef, snapshot => {
     const raw = snapshot.val() || {};
@@ -1559,7 +1366,6 @@ function renderRSVPs(){
   $("guestTotal2").textContent = rsvpItems.length;
   $("guestYes2").textContent   = yes;
   $("guestNo2").textContent    = no;
-  renderTableManager();
 
   if (!rsvpItems.length){
     $("rsvpList").innerHTML =
@@ -1672,6 +1478,129 @@ $("rsvpDetailsModal").addEventListener("click", event => {
   }
 });
 
+
+function exportGuestsPDF(){
+  if (!Array.isArray(rsvpItems) || !rsvpItems.length){
+    toast("Ainda não existem convidados para exportar.");
+    return;
+  }
+
+  const sorted = rsvpItems.slice().sort((a, b) =>
+    String(a.name || a.guestName || "").localeCompare(
+      String(b.name || b.guestName || ""), "pt"
+    )
+  );
+
+  const getAnswer = item => {
+    const answer = String(item.attendance || item.status || "Pendente").trim();
+    const normalized = answer.toLowerCase();
+    if (["sim","confirmed","yes","vou aparecer"].includes(normalized)) return "Confirmou presença";
+    if (["não","nao","no","não vou poder ir","nao vou poder ir"].includes(normalized)) return "Não poderá comparecer";
+    return answer || "Pendente";
+  };
+
+  const yes = sorted.filter(item => getAnswer(item) === "Confirmou presença").length;
+  const no = sorted.filter(item => getAnswer(item) === "Não poderá comparecer").length;
+  const totalCompanions = sorted.reduce((sum, item) => {
+    const details = Array.isArray(item.companionDetails) ? item.companionDetails.length : 0;
+    return sum + Math.max(Number(item.companions || 0), details);
+  }, 0);
+
+  const rows = sorted.map((item, index) => {
+    const name = escapeHTML(item.name || item.guestName || "Convidado");
+    const answer = escapeHTML(getAnswer(item));
+    const phone = escapeHTML(item.phone || item.contact || "—");
+    const companions = Array.isArray(item.companionDetails) ? item.companionDetails : [];
+    const companionList = companions.length
+      ? `<ul>${companions.map(person =>
+          `<li>${escapeHTML(person.name || "Sem nome")} <span>${person.age !== undefined && person.age !== "" ? `(${escapeHTML(person.age)} anos)` : ""}</span></li>`
+        ).join("")}</ul>`
+      : `<span class="muted">${Number(item.companions || 0) ? `${Number(item.companions)} acompanhante(s) indicado(s), sem nomes detalhados` : "Sem acompanhantes"}</span>`;
+    const reason = item.reason
+      ? `<div class="reason"><b>Motivo:</b> ${escapeHTML(item.reason)}</div>`
+      : "";
+    const sent = item.date ? escapeHTML(new Date(item.date).toLocaleString("pt-PT")) : "—";
+    return `<tr>
+      <td class="number">${index + 1}</td>
+      <td><strong>${name}</strong><div class="muted small">${phone}</div></td>
+      <td><span class="status ${answer === "Confirmou presença" ? "yes" : answer === "Não poderá comparecer" ? "no" : "pending"}">${answer}</span>${reason}</td>
+      <td>${companionList}</td>
+      <td class="small">${sent}</td>
+    </tr>`;
+  }).join("");
+
+  const report = `<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista de convidados — Cristiano & Avelina</title>
+<style>
+  @page{size:A4 landscape;margin:14mm}
+  *{box-sizing:border-box}
+  body{font-family:Arial,sans-serif;color:#352622;background:#fff;margin:0}
+  .page{max-width:1100px;margin:0 auto;padding:28px}
+  .header{text-align:center;border-bottom:2px solid #a34d43;padding:8px 0 20px;margin-bottom:18px}
+  .eyebrow{text-transform:uppercase;letter-spacing:3px;font-size:10px;color:#a34d43}
+  h1{font-family:Georgia,serif;font-size:30px;font-weight:normal;margin:8px 0 4px;color:#71372f}
+  .subtitle{font-family:Georgia,serif;font-style:italic;color:#85645c;font-size:15px}
+  .date{font-size:10px;color:#88736d;margin-top:12px}
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 22px}
+  .stat{border:1px solid #eadbd4;background:#fcf7f3;padding:12px;text-align:center;border-radius:7px}
+  .stat b{display:block;font-family:Georgia,serif;font-size:24px;color:#873f37}
+  .stat span{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#78645e}
+  table{width:100%;border-collapse:collapse;font-size:10px}
+  thead{display:table-header-group}
+  th{background:#71372f;color:#fff;text-align:left;padding:10px 8px;font-size:9px;text-transform:uppercase;letter-spacing:.7px}
+  td{border-bottom:1px solid #eadfd9;padding:9px 8px;vertical-align:top;line-height:1.45}
+  tbody tr:nth-child(even){background:#fcf8f5}
+  .number{color:#a34d43;width:30px;text-align:center;font-weight:bold}
+  .small{font-size:9px}.muted{color:#897973}
+  ul{margin:0;padding-left:16px}li{margin:0 0 3px}
+  .status{display:inline-block;padding:4px 7px;border-radius:20px;font-size:8px;font-weight:bold;white-space:nowrap}
+  .yes{background:#e6f1e8;color:#326640}.no{background:#f8e9e6;color:#9b4037}
+  .pending{background:#f2eee5;color:#77633c}
+  .reason{margin-top:6px;color:#80534b;font-size:9px}
+  .footer{text-align:center;border-top:1px solid #eadbd4;margin-top:22px;padding-top:10px;color:#9a8279;font-family:Georgia,serif;font-style:italic;font-size:11px}
+  .actions{text-align:center;margin:0 0 18px}
+  .actions button{border:0;background:#71372f;color:white;border-radius:5px;padding:10px 18px;font-size:13px}
+  @media print{.page{padding:0}.actions{display:none}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}tr{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="actions"><button onclick="window.print()">Imprimir / Guardar como PDF</button></div>
+  <header class="header">
+    <div class="eyebrow">Celebração de casamento</div>
+    <h1>Cristiano &amp; Avelina</h1>
+    <div class="subtitle">Lista de convidados e confirmações de presença</div>
+    <div class="date">Relatório gerado em ${new Date().toLocaleString("pt-PT")}</div>
+  </header>
+  <section class="summary">
+    <div class="stat"><b>${sorted.length}</b><span>Respostas recebidas</span></div>
+    <div class="stat"><b>${yes}</b><span>Presenças confirmadas</span></div>
+    <div class="stat"><b>${no}</b><span>Não poderão comparecer</span></div>
+    <div class="stat"><b>${totalCompanions}</b><span>Acompanhantes indicados</span></div>
+  </section>
+  <table>
+    <thead><tr><th>N.º</th><th>Convidado / Contacto</th><th>Resposta</th><th>Acompanhantes</th><th>Data da resposta</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="footer">Cristiano &amp; Avelina · Com carinho, celebramos este momento especial</div>
+</div>
+<script>window.addEventListener("load",()=>setTimeout(()=>window.print(),350));<\/script>
+</body></html>`;
+
+  const printWindow = window.open("", "_blank");
+  if (!printWindow){
+    toast("O navegador bloqueou a janela. Permita pop-ups e tente novamente.");
+    return;
+  }
+  printWindow.document.open();
+  printWindow.document.write(report);
+  printWindow.document.close();
+}
+
 function previewPublic(){
   const url = new URL("evento.html", location.href);
   url.searchParams.set("id", EVENT_ID);
@@ -1718,27 +1647,8 @@ $("logoutBtn").addEventListener("click", logout);
 
 $("saveInviteBtn").addEventListener("click",  saveAll);
 $("saveDetailsBtn").addEventListener("click", saveAll);
-$("addTableBtn").addEventListener("click", addTable);
-$("saveTablesBtn").addEventListener("click", saveTablePlan);
-$("newTableName").addEventListener("keydown", event => {
-  if (event.key === "Enter"){ event.preventDefault(); addTable(); }
-});
-$("tableManager").addEventListener("click", event => {
-  const button = event.target.closest("[data-remove-table]");
-  if (!button) return;
-  const id = button.dataset.removeTable;
-  tablePlan.tables = (tablePlan.tables || []).filter(t => t.id !== id);
-  renderTableManager();
-  // Guarda automaticamente a eliminação da mesa.
-  saveTablePlan();
-});
 
-$("tableManager").addEventListener("change", event => {
-  if (event.target.matches("[data-person-table]")) {
-    // Guarda automaticamente cada atribuição ou remoção de convidado.
-    saveTablePlan();
-  }
-});
+$("exportGuestsPdfBtn").addEventListener("click", exportGuestsPDF);
 
 $("previewBtn").addEventListener("click", previewPublic);
 $("shareBtn").addEventListener("click",  shareLink);
@@ -1783,7 +1693,6 @@ onAuthStateChanged(auth, async user => {
   try{
     await loadEvent();
     listenRSVPs();
-    listenTablePlan();
     setTab("home");
 
   } catch(error){
